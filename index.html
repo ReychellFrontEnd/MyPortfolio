@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio Multimedia | Reychell Perdomo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/magazine.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="assets/proyectos/LogoPersonalReychellPerdomo.svg">
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#inicio" class="logo"><img src="assets/proyectos/LogoPersonalReychellPerdomo.svg" alt="Reychell Perdomo - inicio"></a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#inicio" class="nav-link">Inicio</a></li>
+                <li><a href="#identidad" class="nav-link">Identidad</a></li>
+                <li><a href="#proyectos" class="nav-link">Proyectos</a></li>
+                <li><a href="#reflexion" class="nav-link">Reflexión</a></li>
+                <li><a href="#contacto" class="nav-link">Contacto</a></li>
+            </ul>
+            <button type="button" class="hamburger" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="navMenu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </nav>
+
+    <main id="main-content">
+    <div id="scrollSentinel" aria-hidden="true"></div>
+    <!-- Sección Hero/Inicio -->
+    <section id="inicio" class="hero">
+        <div class="hero-banner">
+            <img src="assets/proyectos/PORTAFOLIO_Rey.png" alt="Portafolio Reychell Perdomo - Multimedia Designer" class="hero-banner-img">
+        </div>
+    </section>
+
+    <!-- Sección Identidad Profesional -->
+    <section id="identidad" class="section">
+        <div class="container">
+            <h2 class="section-title">Identidad <span>Profesional</span></h2>
+            <div class="identity-bio reveal">
+                <h3>Biografía Profesional</h3>
+                <p>Mi nombre es Reychell Perdomo y soy una estudiante en etapas finales de la carrera de Multimedia. Me apasiona el arte y el poder utilizarlo para crear proyectos capaces de transmitir un mensaje y conectar con un espectador. Tengo una inclinación por el área del diseño gráfico, especialmente con enfoque en el diseño editorial y la maquetación. En adición a esto, tengo un interés creciente en la edición de videos y motion graphics.</p>
+            </div>
+            <div class="identity-grid">
+                <div class="identity-card reveal">
+                    <div class="identity-icon">
+                        <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                    </div>
+                    <h3>Formación</h3>
+                    <p>Estudiante de término del Tecnólogo en Multimedia en el ITLA (Instituto Tecnológico de Las Américas).</p>
+                </div>
+                <div class="identity-card reveal">
+                    <div class="identity-icon">
+                        <i class="fas fa-palette" aria-hidden="true"></i>
+                    </div>
+                    <h3>Especialización</h3>
+                    <p>Especializada en diseño editorial, edición de video, produccion audiovisual y desarrollo web. Enfocada en crear experiencias inolvidables mediante el diseño.</p>
+                </div>
+                <div class="identity-card reveal">
+                    <div class="identity-icon">
+                        <i class="fas fa-tools" aria-hidden="true"></i>
+                    </div>
+                    <h3>Software Dominado</h3>
+                    <ul class="software-list">
+                        <li><strong>Adobe Creative Suite:</strong> Avanzado (Photoshop, Illustrator, InDesing, Premiere, After Effects)</li>
+                        <li><strong>Autodesk Maya:</strong> Intermedio-Avanzado</li>
+                        <li><strong>Ableton Jam:</strong> Intermedio</li>
+                        <li><strong>HTML/CSS/JS:</strong> Intermedio</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="identity-bio reveal">
+                <h3>Motivación</h3>
+                <p>La multimedia me permite fusionar arte y tecnología para contar historias, resolver problemas y crear experiencias impactantes que conecten con las personas.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Proyectos -->
+    <section id="proyectos" class="section">
+        <div class="container">
+            <h2 class="section-title">Proyectos <span>Multimedia</span></h2>
+            <div class="project-filters">
+                <button class="filter-btn active" data-filter="all" aria-pressed="true">Todos</button>
+                <button class="filter-btn" data-filter="branding" aria-pressed="false">Branding</button>
+                <button class="filter-btn" data-filter="illustration" aria-pressed="false">Ilustración</button>
+                <button class="filter-btn" data-filter="web" aria-pressed="false">Web</button>
+                <button class="filter-btn" data-filter="animation" aria-pressed="false">Animación</button>
+                <button class="filter-btn" data-filter="3d" aria-pressed="false">3D</button>
+                <button class="filter-btn" data-filter="editorial" aria-pressed="false">Editorial</button>
+            </div>
+            
+            <div class="projects-grid">
+                <!-- Proyecto 1 - Ilustración Spider-Man -->
+                <div class="project-card reveal" data-category="illustration">
+                    <div class="project-image">
+                        <img src="assets/proyectos/Ilustracion_Segundoparcial_ReychellPerdomo.jpg" alt="Ilustración Spider-Man">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Portada ilustrada de comic</h3>
+                                <p>Portada de Comic para ilustracion digital</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/Ilustracion_Segundoparcial_ReychellPerdomo.jpg">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/Ilustracion_Segundoparcial_ReychellPerdomo.jpg" download="Ilustracion_SpiderMan_ReychellPerdomo.jpg" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-details">
+                        <h3>8 Deaths of Spider-Man</h3>
+                        <p><strong>Curso:</strong> Ilustración Digital</p>
+                        <p><strong>Año:</strong> 2025</p>
+                        <p><strong>Herramientas:</strong> Adobe Photoshop, Illustrator</p>
+                    </div>
+                </div>
+                
+                <!-- Proyecto 2 - Evaluación Programación Web -->
+                <div class="project-card reveal" data-category="web">
+                    <div class="project-image">
+                        <img src="assets/proyectos/Vector_G2_Final_ReychellPerdomo.jpg" alt="Poster vectorizado sobre evolucion tecnologica">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Poster vectorizado sobre evolucion tecnologica</h3>
+                                <p>Creación Poster vectorizado</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/Vector_G2_Final_ReychellPerdomo.jpg">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/Vector_G2_Final_ReychellPerdomo.jpg" download="Poster_Vectorizado_ReychellPerdomo.jpg" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-details">
+                        <h3>Poster vectorizado</h3>
+                        <p><strong>Curso:</strong> Gráficos Vectoriales</p>
+                        <p><strong>Año:</strong> 2025</p>
+                        <p><strong>Herramientas:</strong> Adobe Illustrator</p>
+                    </div>
+                </div>
+                
+                <!-- Proyecto 3 - Café Santo Domingo -->
+                <div class="project-card reveal" data-category="branding">
+                    <div class="project-image">
+                        <img src="assets/proyectos/Bitmap2_ReychellPerdomo_ParcialFinalRGB.jpg" alt="Branding Café Santo Domingo">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Branding Café</h3>
+                                <p>Montaje publicitario para Café Santo Domingo</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/Bitmap2_ReychellPerdomo_ParcialFinalRGB.jpg">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/Bitmap2_ReychellPerdomo_ParcialFinalRGB.jpg" download="Branding_CafeSantoDomingo_ReychellPerdomo.jpg" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-details">
+                        <h3>Café Santo Domingo</h3>
+                        <p><strong>Curso:</strong> Gráficos de mapa de bits</p>
+                        <p><strong>Año:</strong> 2024</p>
+                        <p><strong>Herramientas:</strong> Adobe Photoshop</p>
+                    </div>
+                </div>
+                
+                <!-- Proyecto 4 - revista -->
+                <div class="project-card reveal" data-category="web">
+                    <div class="project-image">
+                        <img src="assets/proyectos/Revistadevideojuego.jpg" alt="Pliego de revista de videojuegos">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Pliego de revista de videojuegos</h3>
+                                <p>Creación Pliego de revista de videojuegos</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/Revistadevideojuego.jpg">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/Revistadevideojuego.jpg" download="Revista_Videojuego_ReychellPerdomo.jpg" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-details">
+                        <h3>Pliego de revista de videojuegos</h3>
+                        <p><strong>Curso:</strong> Desktop Publishing</p>
+                        <p><strong>Año:</strong> 2025</p>
+                        <p><strong>Herramientas:</strong> Adobe InDesing</p>
+                    </div>
+                </div>
+
+                <!-- Proyecto 5 - Poster -->
+                <div class="project-card reveal" data-category="web">
+                    <div class="project-image">
+                        <img src="assets/proyectos/Proyectofinal_Ilustración_ReychellPerdomo.jpg" alt="Poster ilustrado sobre serie Dark">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Poster ilustrado sobre serie "Dark"</h3>
+                                <p>Creación Poster ilustrado sobre serie "Dark"</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/Proyectofinal_Ilustración_ReychellPerdomo.jpg">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/Proyectofinal_Ilustración_ReychellPerdomo.jpg" download="Poster_Dark_ReychellPerdomo.jpg" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-details">
+                        <h3>Poster ilustrado sobre serie "Dark"</h3>
+                        <p><strong>Curso:</strong> Ilustracion Digital</p>
+                        <p><strong>Año:</strong> 2025</p>
+                        <p><strong>Herramientas:</strong> Adobe Photoshop</p>
+                    </div>
+                </div>
+
+                <!-- Proyecto 6 - Infografia -->
+                <div class="project-card reveal" data-category="web">
+                    <div class="project-image">
+                        <img src="assets/proyectos/Desktop_Infografia_ReychellPerdomo.jpg" alt="Infografía creativa">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Infografía creativa</h3>
+                                <p>Creación Infografía creativa</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/Desktop_Infografia_ReychellPerdomo.jpg">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/Desktop_Infografia_ReychellPerdomo.jpg" download="Infografia_ReychellPerdomo.jpg" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-details">
+                        <h3>Infografía creativa</h3>
+                        <p><strong>Curso:</strong> Desktop Publishing</p>
+                        <p><strong>Año:</strong> 2025</p>
+                        <p><strong>Herramientas:</strong> Adobe InDesing</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proyecto 7 - Robot Steampunk: los 3 renders van lado a lado en una
+                 franja de ancho completo (tríptico), no en la cuadrícula normal. -->
+            <div class="project-card reveal project-triptych" data-category="3d">
+                <div class="triptych-row">
+                    <div class="triptych-panel">
+                        <img src="assets/proyectos/ReychellPerdomo_Render1_Vr2.png" alt="Robot steampunk - render 1, vista frontal completa">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Robot Steampunk</h3>
+                                <p>Render 1 — Vista frontal completa</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/ReychellPerdomo_Render1_Vr2.png">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/ReychellPerdomo_Render1_Vr2.png" download="Render1_RobotSteampunk_ReychellPerdomo.png" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="triptych-panel">
+                        <img src="assets/proyectos/ReychellPerdomo_Render2.png" alt="Robot steampunk - render 2, detalle del mecanismo">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Robot Steampunk</h3>
+                                <p>Render 2 — Detalle del mecanismo</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/ReychellPerdomo_Render2.png">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/ReychellPerdomo_Render2.png" download="Render2_RobotSteampunk_ReychellPerdomo.png" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="triptych-panel">
+                        <img src="assets/proyectos/ReychellPerdomo_Render3.png" alt="Robot steampunk - render 3, vista en ángulo con iluminación">
+                        <div class="project-overlay">
+                            <div class="project-info">
+                                <h3>Robot Steampunk</h3>
+                                <p>Render 3 — Vista en ángulo con iluminación</p>
+                                <div class="project-actions">
+                                    <button class="action-btn view-btn" data-type="image" data-src="assets/proyectos/ReychellPerdomo_Render3.png">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> Ver
+                                    </button>
+                                    <a href="assets/proyectos/ReychellPerdomo_Render3.png" download="Render3_RobotSteampunk_ReychellPerdomo.png" class="action-btn download-btn">
+                                        <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-details">
+                    <h3>Robot Steampunk (3 renders)</h3>
+                    <p><strong>Curso:</strong> Modelado y Render 3D</p>
+                    <p><strong>Año:</strong> 2025</p>
+                    <p><strong>Herramientas:</strong> Autodesk Maya</p>
+                </div>
+            </div>
+
+            <!-- Proyecto 8 - Revista digital interactiva (visor tipo flipbook sobre PDF.js).
+                 Mismo tamaño de tarjeta que el tríptico de arriba; ver js/magazine.js -->
+            <div class="project-card reveal project-magazine" data-category="editorial">
+                <div class="magazine-viewer" data-magazine data-pdf="assets/proyectos/ReVibe_ReychellPerdomo_20241104%281%29.pdf" role="region" aria-label="Revista digital interactiva, revisor de páginas">
+                    <div class="magazine-stage">
+                        <button type="button" class="magazine-arrow magazine-prev" aria-label="Página anterior" disabled>
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+
+                        <div class="magazine-page-wrap">
+                            <div class="magazine-page-slot" tabindex="0" aria-label="Página de la revista. Usa las flechas del teclado, los botones o desliza para navegar">
+                                <div class="magazine-spread">
+                                    <div class="magazine-page magazine-page-left">
+                                        <canvas class="magazine-canvas magazine-canvas-left"></canvas>
+                                    </div>
+                                    <div class="magazine-spine" aria-hidden="true"></div>
+                                    <div class="magazine-page magazine-page-right">
+                                        <canvas class="magazine-canvas magazine-canvas-right"></canvas>
+                                    </div>
+                                </div>
+                                <div class="magazine-flip-leaf" hidden>
+                                    <div class="magazine-leaf-face magazine-leaf-front">
+                                        <canvas class="magazine-canvas magazine-canvas-front-left"></canvas>
+                                        <div class="magazine-spine" aria-hidden="true"></div>
+                                        <canvas class="magazine-canvas magazine-canvas-front-right"></canvas>
+                                    </div>
+                                    <div class="magazine-leaf-face magazine-leaf-back">
+                                        <canvas class="magazine-canvas magazine-canvas-back-left"></canvas>
+                                        <div class="magazine-spine" aria-hidden="true"></div>
+                                        <canvas class="magazine-canvas magazine-canvas-back-right"></canvas>
+                                    </div>
+                                </div>
+                                <div class="magazine-status" role="status">
+                                    <span class="magazine-spinner" aria-hidden="true"></span>
+                                    <p>Cargando revista…</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="magazine-arrow magazine-next" aria-label="Página siguiente" disabled>
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="magazine-controls">
+                        <button type="button" class="magazine-btn" data-action="first" aria-label="Primera página" disabled>
+                            <i class="fas fa-angles-left" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="magazine-btn" data-action="prev" aria-label="Página anterior" disabled>
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+
+                        <div class="magazine-pageindicator">
+                            <label class="sr-only" for="magazinePageInput">Ir a la página</label>
+                            <input type="number" id="magazinePageInput" class="magazine-page-input" min="1" value="1" inputmode="numeric">
+                            <span aria-hidden="true">/</span>
+                            <span class="magazine-total-pages">–</span>
+                        </div>
+
+                        <button type="button" class="magazine-btn" data-action="next" aria-label="Página siguiente" disabled>
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="magazine-btn" data-action="last" aria-label="Última página" disabled>
+                            <i class="fas fa-angles-right" aria-hidden="true"></i>
+                        </button>
+
+                        <span class="magazine-sep" aria-hidden="true"></span>
+
+                        <button type="button" class="magazine-btn" data-action="zoom-out" aria-label="Alejar">
+                            <i class="fas fa-magnifying-glass-minus" aria-hidden="true"></i>
+                        </button>
+                        <span class="magazine-zoom">100%</span>
+                        <button type="button" class="magazine-btn" data-action="zoom-in" aria-label="Acercar">
+                            <i class="fas fa-magnifying-glass-plus" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="magazine-btn" data-action="zoom-reset" aria-label="Restablecer zoom">
+                            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                        </button>
+
+                        <span class="magazine-sep" aria-hidden="true"></span>
+
+                        <button type="button" class="magazine-btn" data-action="thumbnails" aria-label="Ver miniaturas de páginas" aria-pressed="false">
+                            <i class="fas fa-table-cells" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="magazine-btn" data-action="fullscreen" aria-label="Pantalla completa">
+                            <i class="fas fa-expand" aria-hidden="true"></i>
+                        </button>
+                        <a class="magazine-btn magazine-download" href="assets/proyectos/ReVibe_ReychellPerdomo_20241104%281%29.pdf" download="Revista_ReVibe_ReychellPerdomo.pdf" aria-label="Descargar revista completa en PDF">
+                            <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                        </a>
+                    </div>
+
+                    <div class="magazine-thumbnails" hidden></div>
+                </div>
+                <div class="project-details">
+                    <h3>ReVibe — Revista Digital</h3>
+                    <p>2025</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Reflexión -->
+    <section id="reflexion" class="section">
+        <div class="container">
+            <h2 class="section-title">Reflexión <span>Profesional</span></h2>
+            <div class="reflection-container">
+                <div class="reflection-card reveal">
+                    <div class="reflection-icon">
+                        <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                    </div>
+                    <h3>Aprendizajes Clave</h3>
+                    <p>El tecnólogo me enseñó que la creación multimedia va más allá de la técnica; es sobre resolver problemas, comunicar ideas y conectar emocionalmente. Descubrí mi capacidad para pensar sistémicamente y adaptarme a diferentes lenguajes visuales.</p>
+                </div>
+                
+                <div class="reflection-card reveal">
+                    <div class="reflection-icon">
+                        <i class="fas fa-bullseye" aria-hidden="true"></i>
+                    </div>
+                    <h3>Fortalezas y Debilidades</h3>
+                    <p><strong>Fortalezas:</strong> Diseño de interfaces intuitivas, animación 2D, capacidad de síntesis visual.<br>
+                    <strong>Debilidades:</strong> Modelado 3D avanzado, programación backend. Plan de mejora: cursos especializados y proyectos desafiantes.</p>
+                </div>
+                
+                <div class="reflection-card reveal">
+                    <div class="reflection-icon">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    </div>
+                    <h3>Proyección Futura</h3>
+                    <p><strong>1 año:</strong> Buen dominio de modelado 3D y desempeñandome de una mejor manera en motion graphics.<br>
+                    <strong>3 años:</strong> Liderar proyectos multimedia en una agencia innovadora.<br>
+                    <strong>5 años:</strong> Desarrollar mi propio estudio de diseño especializado en educación digital.</p>
+                </div>
+                
+                <div class="reflection-full">
+                    <h3>Visión Profesional</h3>
+                    <p>Mi visión profesional como diseñadora multimedia está orientada hacia el diseño editorial, especialmente hacia la creación de revistas que combinen creatividad, estética y una identidad visual atractiva. Me interesa desarrollar piezas que no solo comuniquen un contenido, sino que también generen una conexión con el público y despierten el deseo de conservarlas y coleccionarlas. Disfruto llevar mis ideas del entorno digital a un formato tangible, donde el diseño pueda convertirse en una experiencia física a través de la composición, la tipografía, el color y los detalles de una publicación.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Contacto -->
+    <section id="contacto" class="section">
+        <div class="container">
+            <h2 class="section-title">Contacto <span>Directo</span></h2>
+            <div class="contact-container">
+                <div class="contact-info reveal">
+                    <h3>Información de Contacto</h3>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-envelope" aria-hidden="true"></i></div>
+                        <div>
+                            <h4>Email</h4>
+                            <p><a href="mailto:reychellperdomo@gmail.com">reychellperdomo@gmail.com</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></div>
+                        <div>
+                            <h4>Ubicación</h4>
+                            <p>Santo Domingo, República Dominicana</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fas fa-university" aria-hidden="true"></i></div>
+                        <div>
+                            <h4>Institución</h4>
+                            <p>ITLA - Instituto Tecnológico de Las Américas</p>
+                        </div>
+                    </div>
+                    <div class="social-links">
+                        <a href="#" aria-label="Behance (próximamente)"><i class="fab fa-behance" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="LinkedIn (próximamente)"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="GitHub (próximamente)"><i class="fab fa-github" aria-hidden="true"></i></a>
+                        <a href="#" aria-label="Instagram (próximamente)"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+                <div class="contact-form reveal">
+                    <h3>Envíame un Mensaje</h3>
+                    <form id="contactForm" action="https://formspree.io/f/mgawgrwg" method="POST">
+                        <input type="hidden" name="_subject" value="Nuevo mensaje desde el portafolio">
+                        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+                        <div class="form-group">
+                            <label class="sr-only" for="contactName">Nombre</label>
+                            <input type="text" id="contactName" name="name" placeholder="Nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="contactEmail">Email</label>
+                            <input type="email" id="contactEmail" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="contactSubject">Asunto</label>
+                            <input type="text" id="contactSubject" name="subject" placeholder="Asunto" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="contactMessage">Mensaje</label>
+                            <textarea id="contactMessage" name="message" placeholder="Mensaje" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">Reychell<span>Perdomo</span></div>
+                <p>Portafolio Profesional Multimedia - Tecnólogo en Multimedia ITLA</p>
+                <p class="copyright">© 2026 Reychell Perdomo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal para visualización de proyectos -->
+    <div class="modal" id="projectModal">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-label="Vista previa del proyecto">
+            <button type="button" class="close-modal" aria-label="Cerrar vista previa">&times;</button>
+            <div class="modal-body" id="modalBody">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/magazine.js"></script>
+</body>
+</html>
