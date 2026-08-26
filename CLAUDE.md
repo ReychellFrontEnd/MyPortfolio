@@ -227,15 +227,19 @@ el año, sin curso/herramientas como las demás tarjetas.
   no con una librería de flipbook de terceros (el usuario pidió inspirarse en el visor "FlipBook"
   de dFlip/dearFlip que usa intec.edu.do, pero se implementó el efecto propio, no esa librería).
 - **Spread de 2 páginas abiertas** (`.magazine-spread`: `.magazine-page-left` + `.magazine-spine`
-  + `.magazine-page-right`) en pantallas >900px, para que se sienta como un libro real — a pedido
-  explícito del usuario tras la primera versión (que solo mostraba una página). Empareja páginas
-  como (1,2) (3,4) (5,6)... (`getSpread()` en `js/magazine.js`); es una simplificación deliberada
-  frente a la convención real de libro (portada sola + interior en pares) para no arriesgar bugs de
-  paridad sin poder probarlo en un navegador real. El volteo anima **todo el spread como una sola
-  pieza**, rotando sobre su propio centro (el lomo) — más simple y confiable que animar cada página
-  contra el lomo por separado. En `≤900px` (mismo quiebre que el resto del sitio) cae a una sola
-  página (`root.classList('is-single')`, ver `SINGLE_MODE_QUERY` en el JS), reevaluado en vivo con
-  un listener de `matchMedia` — no hace falta recargar la página para que cambie de modo.
+  + `.magazine-page-right`) en pantallas >900px, para que se sienta como un libro real. Emparejado
+  con la convención real de un libro/revista: **la portada (página 1) va sola**, y desde ahí en
+  adelante pares (2,3) (4,5) (6,7)... — si el total de páginas es par, la última queda sola como
+  contraportada (`getSpread()` en `js/magazine.js`, con la lógica documentada ahí mismo). Aunque el
+  visor esté en modo de dos páginas, cualquier spread "solo" (portada/contraportada) colapsa la
+  mitad derecha dinámicamente vía la clase `is-lone` (`applyLoneState()`), que se aplica al cargar,
+  al navegar (al terminar el volteo, no a mitad de animación — si no, la página entrante/saliente
+  se vería cortada) y al cambiar de modo responsive.
+  El volteo anima **todo el spread como una sola pieza**, rotando sobre su propio centro (el lomo)
+  — más simple y confiable que animar cada página contra el lomo por separado. En `≤900px` (mismo
+  quiebre que el resto del sitio) cae a una sola página (`root.classList('is-single')`, ver
+  `SINGLE_MODE_QUERY` en el JS), reevaluado en vivo con un listener de `matchMedia` — no hace falta
+  recargar la página para que cambie de modo.
   Ver el comentario al inicio de `js/magazine.js` para el resto de las decisiones de alcance (sin
   pinch-to-zoom táctil, zoom por `transform: scale()` en vez de re-render de PDF.js, etc.).
 - **Bug encontrado y corregido (pantalla de carga trabada en 100%)**: el progreso de descarga podía
@@ -283,6 +287,29 @@ el año, sin curso/herramientas como las demás tarjetas.
   64. Si en algún momento aparece un PDF distinto de 87 páginas, basta con reemplazar el archivo en
   `assets/proyectos/` y actualizar el `data-pdf`/`href` en `index.html` — no hace falta tocar
   `js/magazine.js`.
+
+## Rendimiento general del sitio
+
+- **El visor de revista (PDF.js) ya no carga hasta que hace falta**: antes se inicializaba
+  apenas cargaba la página (aunque el usuario nunca bajara hasta Proyectos), descargando ~1MB de
+  PDF.js de una vez. Ahora `bindLazyInit()` en `js/magazine.js` usa un `IntersectionObserver`
+  (`rootMargin: '600px'`) y solo dispara `loadLibraryThenDocument()` cuando la tarjeta está a
+  punto de entrar en pantalla.
+- **Imágenes de proyectos con `loading="lazy" decoding="async"`**: todas las fotos de
+  `.project-card` (los 6 proyectos + los 3 renders del robot) — varias pesan varios MB cada una,
+  y antes se descargaban todas de inmediato aunque estuvieran muy abajo en la página. El logo del
+  navbar y el banner del hero se dejaron sin `lazy` a propósito porque están arriba del todo
+  (cargarlos diferido solo los retrasaría sin necesidad).
+- **Font Awesome y Google Fonts ya no bloquean el primer render**: se cambiaron de
+  `rel="stylesheet"` directo a `rel="preload"` + `onload` que cambia el `rel` a `stylesheet` (con
+  `<noscript>` de respaldo si JS está desactivado). Es seguro aquí porque el hero es una sola
+  imagen sin texto — nada por encima del pliegue depende de esas fuentes/íconos para verse bien de
+  inmediato.
+- `will-change: transform` en `.magazine-flip-leaf` para que el navegador prepare la capa antes de
+  animar el volteo (menos probabilidad de "tirón" en el primer frame de la animación).
+- Antes de esto ya estaba resuelto (ver más arriba, auditoría 2026-08-26): sin listeners de
+  `scroll`, animaciones limitadas a `transform`/`opacity`, `backdrop-filter` solo en navbar/menú
+  móvil/modal, fondo animado infinito eliminado.
 
 ## Publicación en GitHub Pages con dominio personalizado
 

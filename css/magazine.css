@@ -93,11 +93,17 @@
 }
 
 /* En modo de una sola página (móvil angosto) se oculta la mitad derecha
-   y el lomo; la página izquierda pasa a ser "la" página actual. */
+   y el lomo; la página izquierda pasa a ser "la" página actual. Lo mismo
+   aplica cuando el spread actual es "solo" (portada/contraportada) aunque
+   el visor esté en modo de dos páginas. */
 .magazine-viewer.is-single .magazine-page-right,
 .magazine-viewer.is-single .magazine-canvas-front-right,
 .magazine-viewer.is-single .magazine-canvas-back-right,
-.magazine-viewer.is-single .magazine-spine {
+.magazine-viewer.is-single .magazine-spine,
+.magazine-viewer.is-lone .magazine-page-right,
+.magazine-viewer.is-lone .magazine-canvas-front-right,
+.magazine-viewer.is-lone .magazine-canvas-back-right,
+.magazine-viewer.is-lone .magazine-spine {
     display: none;
 }
 
@@ -115,6 +121,7 @@
     transform: rotateY(0deg);
     z-index: 5;
     pointer-events: none;
+    will-change: transform;
 }
 
 .magazine-flip-leaf[hidden] {

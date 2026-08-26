@@ -9,8 +9,16 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/magazine.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome y Google Fonts no bloquean el primer render: los íconos
+         solo aparecen debajo del hero (que es una sola imagen, sin texto), así
+         que cargarlos en paralelo no causa parpadeo visible y acelera la
+         primera pintura de la página. -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;500;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@400;500;700&display=swap">
+    </noscript>
     <link rel="icon" type="image/svg+xml" href="assets/proyectos/LogoPersonalReychellPerdomo.svg">
 </head>
 <body>
@@ -105,7 +113,7 @@
                 <!-- Proyecto 1 - Ilustración Spider-Man -->
                 <div class="project-card reveal" data-category="illustration">
                     <div class="project-image">
-                        <img src="assets/proyectos/Ilustracion_Segundoparcial_ReychellPerdomo.jpg" alt="Ilustración Spider-Man">
+                        <img src="assets/proyectos/Ilustracion_Segundoparcial_ReychellPerdomo.jpg" alt="Ilustración Spider-Man" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Portada ilustrada de comic</h3>
@@ -132,7 +140,7 @@
                 <!-- Proyecto 2 - Evaluación Programación Web -->
                 <div class="project-card reveal" data-category="web">
                     <div class="project-image">
-                        <img src="assets/proyectos/Vector_G2_Final_ReychellPerdomo.jpg" alt="Poster vectorizado sobre evolucion tecnologica">
+                        <img src="assets/proyectos/Vector_G2_Final_ReychellPerdomo.jpg" alt="Poster vectorizado sobre evolucion tecnologica" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Poster vectorizado sobre evolucion tecnologica</h3>
@@ -159,7 +167,7 @@
                 <!-- Proyecto 3 - Café Santo Domingo -->
                 <div class="project-card reveal" data-category="branding">
                     <div class="project-image">
-                        <img src="assets/proyectos/Bitmap2_ReychellPerdomo_ParcialFinalRGB.jpg" alt="Branding Café Santo Domingo">
+                        <img src="assets/proyectos/Bitmap2_ReychellPerdomo_ParcialFinalRGB.jpg" alt="Branding Café Santo Domingo" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Branding Café</h3>
@@ -186,7 +194,7 @@
                 <!-- Proyecto 4 - revista -->
                 <div class="project-card reveal" data-category="web">
                     <div class="project-image">
-                        <img src="assets/proyectos/Revistadevideojuego.jpg" alt="Pliego de revista de videojuegos">
+                        <img src="assets/proyectos/Revistadevideojuego.jpg" alt="Pliego de revista de videojuegos" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Pliego de revista de videojuegos</h3>
@@ -213,7 +221,7 @@
                 <!-- Proyecto 5 - Poster -->
                 <div class="project-card reveal" data-category="web">
                     <div class="project-image">
-                        <img src="assets/proyectos/Proyectofinal_Ilustración_ReychellPerdomo.jpg" alt="Poster ilustrado sobre serie Dark">
+                        <img src="assets/proyectos/Proyectofinal_Ilustración_ReychellPerdomo.jpg" alt="Poster ilustrado sobre serie Dark" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Poster ilustrado sobre serie "Dark"</h3>
@@ -240,7 +248,7 @@
                 <!-- Proyecto 6 - Infografia -->
                 <div class="project-card reveal" data-category="web">
                     <div class="project-image">
-                        <img src="assets/proyectos/Desktop_Infografia_ReychellPerdomo.jpg" alt="Infografía creativa">
+                        <img src="assets/proyectos/Desktop_Infografia_ReychellPerdomo.jpg" alt="Infografía creativa" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Infografía creativa</h3>
@@ -270,7 +278,7 @@
             <div class="project-card reveal project-triptych" data-category="3d">
                 <div class="triptych-row">
                     <div class="triptych-panel">
-                        <img src="assets/proyectos/ReychellPerdomo_Render1_Vr2.png" alt="Robot steampunk - render 1, vista frontal completa">
+                        <img src="assets/proyectos/ReychellPerdomo_Render1_Vr2.png" alt="Robot steampunk - render 1, vista frontal completa" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Robot Steampunk</h3>
@@ -287,7 +295,7 @@
                         </div>
                     </div>
                     <div class="triptych-panel">
-                        <img src="assets/proyectos/ReychellPerdomo_Render2.png" alt="Robot steampunk - render 2, detalle del mecanismo">
+                        <img src="assets/proyectos/ReychellPerdomo_Render2.png" alt="Robot steampunk - render 2, detalle del mecanismo" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Robot Steampunk</h3>
@@ -304,7 +312,7 @@
                         </div>
                     </div>
                     <div class="triptych-panel">
-                        <img src="assets/proyectos/ReychellPerdomo_Render3.png" alt="Robot steampunk - render 3, vista en ángulo con iluminación">
+                        <img src="assets/proyectos/ReychellPerdomo_Render3.png" alt="Robot steampunk - render 3, vista en ángulo con iluminación" loading="lazy" decoding="async">
                         <div class="project-overlay">
                             <div class="project-info">
                                 <h3>Robot Steampunk</h3>

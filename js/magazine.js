@@ -96,10 +96,29 @@
             this.bindPageClick();
             this.bindResponsive();
 
-            this.loadLibraryThenDocument();
+            this.bindLazyInit();
         }
 
         // ---------- Carga ----------
+
+        // pdf.js pesa ~1MB y el PDF real varias decenas de MB — no tiene
+        // sentido empezar a traerlo si el usuario nunca llega a desplazarse
+        // hasta esta tarjeta. Se dispara solo cuando el visor está a punto
+        // de entrar en pantalla (con margen, para que ya esté listo o casi).
+        bindLazyInit() {
+            if (!('IntersectionObserver' in window)) {
+                this.loadLibraryThenDocument();
+                return;
+            }
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    obs.disconnect();
+                    this.loadLibraryThenDocument();
+                });
+            }, { rootMargin: '600px 0px' });
+            observer.observe(this.root);
+        }
 
         setStatus(kind, message) {
             if (!this.statusEl) return;
@@ -242,12 +261,16 @@
 
         // ---------- Paginación en spreads (páginas dobles) ----------
 
-        // Empareja (1,2) (3,4) (5,6)... En modo de una sola página, cada
-        // "spread" tiene una única página.
+        // Portada (página 1) sola, luego pares reales de libro: (2,3) (4,5)
+        // (6,7)... Si el total de páginas es par, la última queda sola (como
+        // contraportada) porque el conteo de páginas interiores es impar.
+        // En modo de una sola página, cada "spread" tiene una única página.
         getSpread(page) {
             if (this.singleMode) return [page];
-            const idx = Math.floor((page - 1) / 2);
-            const left = idx * 2 + 1;
+            if (page <= 1) return [1];
+
+            const idx = Math.floor((page - 2) / 2);
+            const left = Math.min(2 + idx * 2, this.totalPages);
             const right = Math.min(left + 1, this.totalPages);
             return left === right ? [left] : [left, right];
         }
@@ -330,9 +353,18 @@
             target.getContext('2d').drawImage(source, 0, 0);
         }
 
+        // La portada (y a veces la contraportada) se muestra sola aunque el
+        // visor esté en modo de dos páginas — oculta la mitad derecha y el
+        // lomo solo para ese spread puntual.
+        applyLoneState(pages) {
+            this.root.classList.toggle('is-lone', !this.singleMode && pages.length === 1);
+        }
+
         async renderSpread(pages) {
             const targetHeight = this.pageSlot.clientHeight || 400;
             const [leftNum, rightNum] = pages;
+
+            this.applyLoneState(pages);
 
             const leftCanvas = await this.getPageCanvas(leftNum, targetHeight);
             this.paintCanvas(this.leftCanvas, leftCanvas);
@@ -384,8 +416,9 @@
                 if (this.reducedMotion) {
                     this.paintCanvas(this.leftCanvas, nextLeftCanvas);
                     this.paintCanvas(this.rightCanvas, nextRightCanvas);
+                    this.applyLoneState(targetSpread);
                 } else {
-                    await this.playFlip(nextLeftCanvas, nextRightCanvas, dir);
+                    await this.playFlip(nextLeftCanvas, nextRightCanvas, targetSpread, dir);
                 }
 
                 this.currentPage = targetAnchor;
@@ -402,7 +435,7 @@
 
         // Todo el spread (ambas páginas) gira como una sola pieza sobre su
         // propio centro — el libro completo rotando sobre el lomo.
-        playFlip(nextLeftCanvas, nextRightCanvas, direction) {
+        playFlip(nextLeftCanvas, nextRightCanvas, targetSpread, direction) {
             return new Promise((resolve) => {
                 const leaf = this.flipLeaf;
                 if (!leaf) {
@@ -416,6 +449,12 @@
                 this.paintCanvas(this.frontRight, this.singleMode ? null : this.rightCanvas);
                 this.paintCanvas(this.backLeft, nextLeftCanvas);
                 this.paintCanvas(this.backRight, nextRightCanvas);
+
+                // Si se está entrando o saliendo de una página "sola" (portada
+                // o contraportada), no colapsar el lado derecho hasta que la
+                // animación termine — si no, la página que aparece/desaparece
+                // de ese lado se cortaría a la mitad del volteo.
+                if (!this.singleMode) this.root.classList.remove('is-lone');
 
                 leaf.style.transitionDuration = '0ms';
                 leaf.style.transform = 'rotateY(0deg)';
@@ -440,6 +479,7 @@
                     clearTimeout(fallbackTimer);
                     this.paintCanvas(this.leftCanvas, nextLeftCanvas);
                     this.paintCanvas(this.rightCanvas, nextRightCanvas);
+                    this.applyLoneState(targetSpread);
                     leaf.hidden = true;
                     leaf.style.transform = 'rotateY(0deg)';
                     resolve();
