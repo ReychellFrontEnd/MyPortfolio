@@ -228,12 +228,18 @@
             // siempre. Se avisa, pero la carga real sigue en curso; si
             // termina después, `hideStatus()` más abajo igual la revela.
             const hardTimeout = new Promise((resolve) => {
-                setTimeout(() => resolve('timeout'), 45000);
+                setTimeout(() => resolve('timeout'), 20000);
             });
 
             try {
                 const result = await Promise.race([loadingTask.promise, hardTimeout]);
                 if (result === 'timeout') {
+                    // A partir de aquí se deja de confiar en el % de progreso:
+                    // ya pasó el tiempo normal, y si un evento de progreso
+                    // tardío llegara a disparar de nuevo, no debe pisar este
+                    // mensaje con un porcentaje viejo/congelado.
+                    docReady = true;
+                    loadingTask.onProgress = null;
                     this.setStatus(
                         'error',
                         'Esto está tardando más de lo normal (el archivo es grande). Puedes esperar un poco más o descargarlo directamente con el botón de abajo.'
