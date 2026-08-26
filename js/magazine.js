@@ -343,7 +343,11 @@
 
         paintCanvas(target, source) {
             if (!target) return;
-            if (!source) {
+            // `source` puede ser un canvas real pero ya vacío (0×0) — pasa
+            // cuando venimos de una página "sola" (portada/contraportada) y
+            // el otro lado se había limpiado. drawImage() de un canvas 0×0
+            // lanza InvalidStateError, así que se trata igual que "sin imagen".
+            if (!source || !source.width || !source.height) {
                 target.width = 0;
                 target.height = 0;
                 return;
