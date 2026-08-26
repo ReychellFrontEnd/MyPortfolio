@@ -282,11 +282,28 @@ Preparado para que la subida a GitHub no rompa nada:
 - `.nojekyll` en la raíz evita que GitHub Pages intente procesar el sitio con Jekyll.
 - El favicon usa el logo SVG existente (`assets/proyectos/LogoPersonalReychellPerdomo.svg`) en vez
   de un `favicon.ico` que no existía en el proyecto.
-- **Pendiente si se usa un dominio personalizado**: agregar un archivo `CNAME` en la raíz del
-  repo con el dominio exacto (ej. `reychellperdomo.com`) y configurar el registro DNS (A/ALIAS o
-  CNAME, según el proveedor) apuntando a GitHub Pages. Esto no se hizo porque el dominio no se ha
-  definido todavía — avisar el dominio final para añadir el archivo.
-- Recomendado activar "Enforce HTTPS" en GitHub Pages una vez el dominio esté verificado.
+- **Dominio personalizado: `reychellperdomo.lat`**. Ya existe el archivo `CNAME` en la raíz del
+  repo con ese dominio (commit `6149a79`). Repositorio real:
+  `https://github.com/ReychellFrontEnd/MyPortfolio` (dueño/organización `ReychellFrontEnd`, no
+  `ReychellPerdomo`) → el dominio de Pages por defecto es `reychellfrontend.github.io`.
+- **Importante — el dominio ya tenía un sitio en vivo**: `reychellperdomo.lat` estaba (y puede que
+  siga estando, según DNS) sirviendo un **WordPress en Hostinger** (tema Astra) en el momento de
+  conectar el dominio a GitHub Pages. El usuario confirmó explícitamente que quería reemplazarlo.
+  Si en el futuro el dominio "deja de funcionar" o vuelve a mostrar el WordPress, revisar primero
+  si el DNS se revirtió antes de asumir que es un bug del portafolio.
+- **DNS necesario en Hostinger** (nameservers `ns1/ns2.hostinginbox.com`) para que el dominio
+  apunte a GitHub Pages en vez de al hosting de Hostinger:
+  - Registro `A` en `@` (raíz) → las 4 IPs de GitHub Pages: `185.199.108.153`, `185.199.109.153`,
+    `185.199.110.153`, `185.199.111.153` (reemplazando cualquier `A` existente, ej. `50.31.174.166`
+    que apuntaba al WordPress).
+  - (Opcional, IPv6) `AAAA` en `@` → `2606:50c0:8000::153`, `2606:50c0:8001::153`,
+    `2606:50c0:8002::153`, `2606:50c0:8003::153`.
+  - `CNAME` en `www` → `reychellfrontend.github.io.` (con el punto final).
+  - Esto no se pudo hacer desde aquí (requiere entrar al panel de Hostinger) — quedó como
+    instrucción para el usuario.
+- Después de que el DNS propague y GitHub verifique el dominio (Settings → Pages), activar
+  "Enforce HTTPS" — tarda un rato en aparecer disponible tras la verificación (GitHub emite el
+  certificado TLS automáticamente).
 
 ## Notas de la sesión (2026-08-25/26)
 
