@@ -248,6 +248,16 @@ el año, sin curso/herramientas como las demás tarjetas.
   (si termina después, el visor igual aparece). **Recomendación para probarlo**: abrir el sitio con
   un servidor local (`python -m http.server`), no con doble clic al archivo — `file://` no soporta
   range-requests y obliga a descargar el PDF completo antes de mostrar nada.
+- **Segundo bug encontrado y corregido (pantalla de carga trabada en 99%, ya en producción)**: aun
+  con el fix anterior, el overlay de carga volvía a aparecer solo y se quedaba fijo en 99% —
+  aunque el visor funcionaba bien detrás (las páginas cargaban y se podía navegar). Causa real:
+  `loadingTask.onProgress` de pdf.js sigue disparándose después de que el documento ya cargó (por
+  las páginas que se van pidiendo con rangos de bytes), y cada disparo volvía a llamar
+  `setStatus('loading', ...)`, reabriendo el overlay indefinidamente (nunca llega a 100% porque el
+  código lo tope a 99 a propósito, y nada más volvía a llamar `hideStatus()`). Arreglado con una
+  bandera `docReady` que el callback de progreso revisa antes de actuar, más
+  `loadingTask.onProgress = null` en cuanto el documento ya cargó — así ningún progreso tardío
+  puede reabrir la pantalla de carga.
 - **Estados**: carga inicial (spinner + progreso si el navegador lo reporta), error si el PDF no
   existe o falla (nunca pantalla en blanco — mensaje que incluye la ruta exacta esperada), botones
   primera/anterior/siguiente/última con `disabled` en los extremos, zoom con límites (70%–160%).

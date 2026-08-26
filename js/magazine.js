@@ -178,8 +178,15 @@
                 disableStream: false,
             });
 
+            // pdf.js sigue reportando progreso de descarga (por los rangos de
+            // páginas que se van pidiendo) incluso después de que el documento
+            // ya cargó y se ocultó la pantalla de carga. Sin esta bandera, ese
+            // progreso tardío volvía a mostrar el overlay de "Cargando... 99%"
+            // para siempre, aunque el visor ya funcionara bien detrás.
+            let docReady = false;
             let lastPct = -1;
             loadingTask.onProgress = (progress) => {
+                if (docReady) return;
                 if (progress && progress.total) {
                     const pct = Math.min(99, Math.round((progress.loaded / progress.total) * 100));
                     if (pct !== lastPct) {
@@ -218,6 +225,8 @@
                 }
             } finally {
                 clearTimeout(slowNoticeTimer);
+                docReady = true;
+                loadingTask.onProgress = null;
             }
 
             this.totalPages = this.pdfDoc.numPages;
