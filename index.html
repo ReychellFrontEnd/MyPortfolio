@@ -367,8 +367,11 @@
                 </div>
             </div>
 
-            <!-- Proyecto 9 - Revista digital interactiva (visor tipo flipbook sobre PDF.js).
-                 Mismo tamaño de tarjeta que el tríptico de arriba; ver js/magazine.js -->
+            <!-- Proyectos 9 y 10 en paralelo: dos lectores de PDF interactivos
+                 uno junto al otro en escritorio (uno abajo del otro en móvil).
+                 Ver js/magazine.js (MagazineViewer y GuideViewer). -->
+            <div class="projects-duo">
+            <!-- Proyecto 9 - Revista digital interactiva (visor tipo flipbook sobre PDF.js). -->
             <div class="project-card reveal project-magazine" data-category="editorial">
                 <div class="magazine-viewer" data-magazine data-pdf="assets/proyectos/ReVibe_ReychellPerdomo_20241104%281%29.pdf" role="region" aria-label="Revista digital interactiva, revisor de páginas">
                     <div class="magazine-stage">
@@ -465,6 +468,37 @@
                     <h3>ReVibe — Revista Digital</h3>
                     <p>2025</p>
                 </div>
+            </div>
+
+            <!-- Proyecto 10 - Guía navegable interactiva: PDF de pocas páginas
+                 que se lee desplazándose dentro de la propia tarjeta (sin
+                 modal). Los enlaces reales del documento (tienda, Spotify)
+                 quedan clicables sobre el render; ver js/magazine.js. -->
+            <div class="project-card reveal project-guide" data-category="editorial">
+                <div class="guide-viewer" data-guide data-pdf="assets/proyectos/Practicaguianavegable_ReychellPerdomo.pdf" role="region" aria-label="Guía interactiva navegable en PDF, con desplazamiento propio">
+                    <div class="guide-scroll" tabindex="0" aria-label="Contenido de la guía. Desplázate para leer; los enlaces del documento abren en una pestaña nueva">
+                        <div class="guide-pages"></div>
+                        <div class="magazine-status" role="status">
+                            <span class="magazine-spinner" aria-hidden="true"></span>
+                            <p>Cargando guía…</p>
+                        </div>
+                    </div>
+
+                    <div class="magazine-controls">
+                        <span class="magazine-pageindicator">
+                            Página <span class="guide-current-page">1</span> de <span class="guide-total-pages">–</span>
+                        </span>
+                        <span class="magazine-sep" aria-hidden="true"></span>
+                        <a class="magazine-btn magazine-download" href="assets/proyectos/Practicaguianavegable_ReychellPerdomo.pdf" download="Guia_Navegable_ReychellPerdomo.pdf" aria-label="Descargar guía completa en PDF">
+                            <i class="fas fa-download" aria-hidden="true"></i> Descargar
+                        </a>
+                    </div>
+                </div>
+                <div class="project-details">
+                    <h3>Guía navegable — Hit Me Hard and Soft</h3>
+                    <p>2025</p>
+                </div>
+            </div>
             </div>
         </div>
     </section>

@@ -1,30 +1,41 @@
 /**
- * Visor de revista digital interactiva (flipbook) sobre PDF.js.
- * Renderiza páginas del PDF bajo demanda (nunca todas a la vez, sin
- * importar cuántas tenga el archivo), con caché acotada, precarga de
- * páginas cercanas en tiempo ocioso, zoom por transform, pantalla completa
- * y una animación de volteo con CSS 3D. El número total de páginas se lee
- * del propio PDF (`pdfDoc.numPages`) — no hay ningún conteo fijo en el código.
+ * Visores de PDF interactivos del portafolio, ambos sobre PDF.js (compartido
+ * vía `ensurePdfJs()`, ver más abajo). Dos clases, dos formas de leer:
  *
- * Modo de vista:
- * - En pantallas anchas (>900px) se muestran DOS páginas abiertas a la vez
- *   (un "spread"), emparejadas como (1,2) (3,4) (5,6)... y el volteo anima
- *   el spread completo girando sobre su propio centro (el "lomo"), como si
- *   todo el libro rotara sobre esa línea — más simple y confiable de
- *   implementar sin poder probarlo en un navegador real que animar cada
- *   página contra el lomo por separado, y da la misma sensación de "libro
- *   abierto" pedida.
- * - En pantallas angostas (≤900px, mismo quiebre que el resto del sitio)
- *   se cae a una sola página visible, porque dos páginas ahí no cabrían
- *   con texto legible.
+ * 1. `MagazineViewer` ([data-magazine], revista ReVibe): flipbook con
+ *    volteo de página animado. Renderiza bajo demanda (nunca todas las
+ *    páginas a la vez, sin importar cuántas tenga el archivo), con caché
+ *    acotada, precarga de páginas cercanas en tiempo ocioso, zoom por
+ *    transform, pantalla completa y una animación de volteo con CSS 3D. El
+ *    número total de páginas se lee del propio PDF (`pdfDoc.numPages`) — no
+ *    hay ningún conteo fijo en el código.
  *
- * Decisiones de alcance adicionales:
- * - El zoom es un `transform: scale()` sobre las páginas ya renderizadas,
- *   no un re-render de PDF.js a mayor resolución — evita bloquear el hilo
- *   principal en cada click de zoom.
- * - Sin pinch-to-zoom táctil personalizado (quedó fuera de alcance,
- *   marcado como opcional en el pedido original); no se bloquea el gesto
- *   nativo del navegador.
+ *    Modo de vista:
+ *    - En pantallas anchas (>900px) se muestran DOS páginas abiertas a la
+ *      vez (un "spread"), emparejadas como (1,2) (3,4) (5,6)... y el volteo
+ *      anima el spread completo girando sobre su propio centro (el "lomo"),
+ *      como si todo el libro rotara sobre esa línea — más simple y
+ *      confiable de implementar sin poder probarlo en un navegador real que
+ *      animar cada página contra el lomo por separado, y da la misma
+ *      sensación de "libro abierto" pedida.
+ *    - En pantallas angostas (≤900px, mismo quiebre que el resto del sitio)
+ *      se cae a una sola página visible, porque dos páginas ahí no cabrían
+ *      con texto legible.
+ *
+ *    Decisiones de alcance adicionales:
+ *    - El zoom es un `transform: scale()` sobre las páginas ya renderizadas,
+ *      no un re-render de PDF.js a mayor resolución — evita bloquear el
+ *      hilo principal en cada click de zoom.
+ *    - Sin pinch-to-zoom táctil personalizado (quedó fuera de alcance,
+ *      marcado como opcional en el pedido original); no se bloquea el
+ *      gesto nativo del navegador.
+ *
+ * 2. `GuideViewer` ([data-guide], guía navegable): todas las páginas
+ *    apiladas verticalmente dentro de un contenedor con scroll propio (se
+ *    desplaza directamente en la tarjeta, sin abrir ningún modal). Los
+ *    enlaces reales que trae el PDF (URIs externas, ej. tienda/Spotify) se
+ *    reproducen como zonas clicables sobre el render, en la posición exacta
+ *    que indica el propio PDF. Ver el comentario al inicio de esa clase.
  */
 (function () {
     'use strict';
@@ -38,6 +49,58 @@
     const MAX_CACHE_PAGES = 16;
     const SWIPE_THRESHOLD = 45;
     const SINGLE_MODE_QUERY = '(max-width: 900px)';
+
+    // ---------- Carga de pdf.js (compartida entre todos los visores) ----------
+    // pdf.js es un singleton global (`window.pdfjsLib`): si el visor de
+    // revista y el de la guía navegable entran en pantalla casi al mismo
+    // tiempo, cada uno pidiendo su propia copia duplicaría la descarga y
+    // podría pisarse el worker. `pdfJsLoadingPromise` memoiza la promesa de
+    // carga a nivel de módulo para que solo se pida una vez sin importar
+    // cuántos visores la necesiten.
+    let pdfJsLoadingPromise = null;
+
+    function ensurePdfJs() {
+        if (window.pdfjsLib) return Promise.resolve();
+        if (pdfJsLoadingPromise) return pdfJsLoadingPromise;
+
+        pdfJsLoadingPromise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = CDN_BASE + 'pdf.min.js';
+            script.onload = async () => {
+                if (!window.pdfjsLib) {
+                    reject(new Error('pdf.js cargó pero pdfjsLib no está definido'));
+                    return;
+                }
+                try {
+                    // El worker se instancia como Blob same-origin: crearlo
+                    // directo desde la URL del CDN falla en algunos
+                    // navegadores/contextos (ej. abriendo el sitio con
+                    // file:// en vez de un servidor) porque un Worker
+                    // "clásico" no puede apuntar a un script de otro
+                    // origen. Si esto falla, seguimos con la URL directa
+                    // (pdf.js cae a un "fake worker" en el hilo principal,
+                    // más lento pero funcional).
+                    const workerSrc = await fetchAsBlobUrl(CDN_BASE + 'pdf.worker.min.js');
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+                } catch (e) {
+                    console.warn('[pdfjs] No se pudo preparar el worker como blob, se usa la URL directa:', e);
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = CDN_BASE + 'pdf.worker.min.js';
+                }
+                resolve();
+            };
+            script.onerror = () => reject(new Error('No se pudo cargar pdf.js desde el CDN'));
+            document.head.appendChild(script);
+        });
+
+        return pdfJsLoadingPromise;
+    }
+
+    async function fetchAsBlobUrl(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status} al descargar ${url}`);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    }
 
     class MagazineViewer {
         constructor(root) {
@@ -137,7 +200,7 @@
         async loadLibraryThenDocument() {
             this.setStatus('loading', 'Cargando revista…');
             try {
-                await this.ensurePdfJs();
+                await ensurePdfJs();
                 await this.loadDocument();
             } catch (err) {
                 console.error('[magazine] No se pudo inicializar el visor:', err);
@@ -146,45 +209,6 @@
                     `No se pudo cargar la revista. Verifica que el archivo exista en: ${this.pdfUrl}`
                 );
             }
-        }
-
-        ensurePdfJs() {
-            if (window.pdfjsLib) return Promise.resolve();
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = CDN_BASE + 'pdf.min.js';
-                script.onload = async () => {
-                    if (!window.pdfjsLib) {
-                        reject(new Error('pdf.js cargó pero pdfjsLib no está definido'));
-                        return;
-                    }
-                    try {
-                        // El worker se instancia como Blob same-origin: crearlo
-                        // directo desde la URL del CDN falla en algunos
-                        // navegadores/contextos (ej. abriendo el sitio con
-                        // file:// en vez de un servidor) porque un Worker
-                        // "clásico" no puede apuntar a un script de otro
-                        // origen. Si esto falla, seguimos con la URL directa
-                        // (pdf.js cae a un "fake worker" en el hilo principal,
-                        // más lento pero funcional).
-                        const workerSrc = await this.fetchAsBlobUrl(CDN_BASE + 'pdf.worker.min.js');
-                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
-                    } catch (e) {
-                        console.warn('[magazine] No se pudo preparar el worker como blob, se usa la URL directa:', e);
-                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = CDN_BASE + 'pdf.worker.min.js';
-                    }
-                    resolve();
-                };
-                script.onerror = () => reject(new Error('No se pudo cargar pdf.js desde el CDN'));
-                document.head.appendChild(script);
-            });
-        }
-
-        async fetchAsBlobUrl(url) {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP ${response.status} al descargar ${url}`);
-            const blob = await response.blob();
-            return URL.createObjectURL(blob);
         }
 
         async loadDocument() {
@@ -776,10 +800,194 @@
         }
     }
 
+    /**
+     * Guía navegable: a diferencia del flipbook, todas las páginas se
+     * apilan verticalmente dentro de `.guide-scroll` (un contenedor con su
+     * propio `overflow-y: auto`) para poder leerla desplazándose "desde
+     * afuera", sin abrir ningún modal ni cambiar de página con botones.
+     * Como el PDF real de este proyecto es corto (unas pocas páginas), se
+     * renderizan todas al cargar en vez de recortar a un cache/ventana como
+     * hace `MagazineViewer` con la revista (que sí puede tener decenas de
+     * páginas) — igual se lee `pdfDoc.numPages` del archivo, sin conteo fijo.
+     *
+     * Enlaces reales del PDF: `page.getAnnotations()` expone las anotaciones
+     * de tipo Link con URL (las que el propio documento trae, ej. una
+     * tienda o Spotify). Se reproducen como una zona clicable transparente
+     * posicionada con el `rect` que da el PDF, convertido a porcentaje del
+     * ancho/alto de esa página (no a píxeles) para que la posición siga
+     * siendo correcta sin recalcular nada si la tarjeta cambia de tamaño.
+     */
+    class GuideViewer {
+        constructor(root) {
+            this.root = root;
+            this.pdfUrl = root.dataset.pdf;
+
+            this.scrollEl = root.querySelector('.guide-scroll');
+            this.pagesEl = root.querySelector('.guide-pages');
+            this.statusEl = root.querySelector('.magazine-status');
+            this.currentPageEl = root.querySelector('.guide-current-page');
+            this.totalPagesEl = root.querySelector('.guide-total-pages');
+
+            this.pdfDoc = null;
+            this.totalPages = 0;
+
+            // Se crea ahora (el contenedor ya existe en el HTML) pero cada
+            // página se agrega a la observación recién cuando se renderiza,
+            // más abajo en renderPage().
+            this.pageObserver = ('IntersectionObserver' in window) && this.scrollEl
+                ? new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting && this.currentPageEl) {
+                            this.currentPageEl.textContent = entry.target.dataset.page;
+                        }
+                    });
+                }, { root: this.scrollEl, threshold: 0.5 })
+                : null;
+
+            this.bindLazyInit();
+        }
+
+        setStatus(kind, message) {
+            if (!this.statusEl) return;
+            this.statusEl.hidden = false;
+            this.statusEl.classList.toggle('is-error', kind === 'error');
+            const icon = kind === 'error'
+                ? '<i class="fas fa-triangle-exclamation" aria-hidden="true"></i>'
+                : '<span class="magazine-spinner" aria-hidden="true"></span>';
+            this.statusEl.innerHTML = `${icon}<p>${message}</p>`;
+        }
+
+        hideStatus() {
+            if (this.statusEl) this.statusEl.hidden = true;
+        }
+
+        // Igual que el visor de revista: no se pide pdf.js ni el PDF hasta
+        // que esta tarjeta está a punto de entrar en pantalla.
+        bindLazyInit() {
+            if (!('IntersectionObserver' in window)) {
+                this.loadLibraryThenDocument();
+                return;
+            }
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    obs.disconnect();
+                    this.loadLibraryThenDocument();
+                });
+            }, { rootMargin: '600px 0px' });
+            observer.observe(this.root);
+        }
+
+        async loadLibraryThenDocument() {
+            this.setStatus('loading', 'Cargando guía…');
+            try {
+                await ensurePdfJs();
+                await this.loadDocument();
+            } catch (err) {
+                console.error('[guide] No se pudo inicializar el visor:', err);
+                this.setStatus(
+                    'error',
+                    `No se pudo cargar la guía. Verifica que el archivo exista en: ${this.pdfUrl}`
+                );
+            }
+        }
+
+        async loadDocument() {
+            const loadingTask = window.pdfjsLib.getDocument({
+                url: this.pdfUrl,
+                disableAutoFetch: true,
+                disableStream: false,
+            });
+            this.pdfDoc = await loadingTask.promise;
+            this.totalPages = this.pdfDoc.numPages;
+            if (this.totalPagesEl) this.totalPagesEl.textContent = String(this.totalPages);
+
+            for (let pageNum = 1; pageNum <= this.totalPages; pageNum += 1) {
+                // Intencional en serie (no Promise.all): pdf.js comparte un
+                // solo worker por documento, así que renderizar en paralelo
+                // no sería más rápido y sí más difícil de seguir si falla
+                // una página a mitad de camino.
+                // eslint-disable-next-line no-await-in-loop
+                await this.renderPage(pageNum);
+            }
+
+            this.hideStatus();
+        }
+
+        async renderPage(pageNum) {
+            const page = await this.pdfDoc.getPage(pageNum);
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            const targetWidthCss = this.pagesEl.clientWidth || 700;
+            const unscaled = page.getViewport({ scale: 1 });
+            const scale = (targetWidthCss * dpr) / unscaled.width;
+            const viewport = page.getViewport({ scale });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            const ctx = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport }).promise;
+
+            const pageEl = document.createElement('div');
+            pageEl.className = 'guide-page';
+            pageEl.dataset.page = String(pageNum);
+            pageEl.appendChild(canvas);
+
+            await this.addLinkHotspots(pageEl, page);
+
+            this.pagesEl.appendChild(pageEl);
+            if (this.pageObserver) this.pageObserver.observe(pageEl);
+        }
+
+        // Solo enlaces reales del PDF (URI externas) — no hay destinos de
+        // "ir a la página X" internos en este documento, así que no se
+        // inventa esa navegación.
+        async addLinkHotspots(pageEl, page) {
+            const annotations = await page.getAnnotations();
+            const view = page.view; // [x0, y0, x1, y1] en puntos PDF, sin rotar
+            const pageWidthPt = view[2] - view[0];
+            const pageHeightPt = view[3] - view[1];
+
+            annotations
+                .filter((a) => a.subtype === 'Link' && a.url)
+                .forEach((a) => {
+                    const [rx0, ry0, rx1, ry1] = a.rect;
+                    const left = ((Math.min(rx0, rx1) - view[0]) / pageWidthPt) * 100;
+                    const width = (Math.abs(rx1 - rx0) / pageWidthPt) * 100;
+                    // El origen en PDF crece hacia arriba; el de CSS hacia abajo.
+                    const top = ((view[3] - Math.max(ry0, ry1)) / pageHeightPt) * 100;
+                    const height = (Math.abs(ry1 - ry0) / pageHeightPt) * 100;
+
+                    let hostname = a.url;
+                    try {
+                        hostname = new URL(a.url).hostname;
+                    } catch (e) {
+                        // URL relativa o mal formada: se deja el texto tal cual.
+                    }
+
+                    const link = document.createElement('a');
+                    link.className = 'guide-page-link';
+                    link.href = a.url;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.style.left = `${left}%`;
+                    link.style.top = `${top}%`;
+                    link.style.width = `${width}%`;
+                    link.style.height = `${height}%`;
+                    link.setAttribute('aria-label', `Abrir enlace externo (${hostname})`);
+                    pageEl.appendChild(link);
+                });
+        }
+    }
+
     function init() {
         document.querySelectorAll('[data-magazine]').forEach((root) => {
             // eslint-disable-next-line no-new
             new MagazineViewer(root);
+        });
+        document.querySelectorAll('[data-guide]').forEach((root) => {
+            // eslint-disable-next-line no-new
+            new GuideViewer(root);
         });
     }
 

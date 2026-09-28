@@ -1,7 +1,10 @@
-/* Visor de revista digital interactiva (flipbook sobre PDF.js).
-   Mismo ancho/alto de tarjeta que .project-triptych (Robot Steampunk):
-   70% del contenedor, máx. 780px, centrado. La franja inferior
-   (.project-details) es deliberadamente delgada: solo nombre + año. */
+/* Dos visores de PDF interactivos (revista + guía navegable), ambos sobre
+   PDF.js. Mismo ancho/alto de tarjeta que .project-triptych (Robot
+   Steampunk): 70% del contenedor, máx. 780px, centrado — salvo cuando van
+   en paralelo dentro de .projects-duo (ver más abajo), donde cada uno cede
+   ese ancho fijo para repartirse el espacio en partes iguales. La franja
+   inferior (.project-details) es deliberadamente delgada en ambos: solo
+   nombre + año. */
 
 .project-magazine {
     margin: 1.5rem auto 0;
@@ -9,28 +12,122 @@
     max-width: 780px;
 }
 
-.project-magazine .project-details {
+.project-magazine .project-details,
+.project-guide .project-details {
     padding: 1rem 1.5rem;
     text-align: center;
 }
 
-.project-magazine .project-details h3 {
+.project-magazine .project-details h3,
+.project-guide .project-details h3 {
     margin-bottom: 0.2rem;
     font-size: 1.1rem;
 }
 
-.project-magazine .project-details p {
+.project-magazine .project-details p,
+.project-guide .project-details p {
     margin-bottom: 0;
     color: var(--sakura);
     justify-content: center;
 }
 
-.magazine-viewer {
+/* Revista + guía navegable lado a lado en escritorio (una franja de ancho
+   completo, como el tríptico, pero repartida entre dos tarjetas en vez de
+   una). Cada tarjeta cede su ancho fijo del 70%/780px para repartirse el
+   espacio de .projects-duo en partes iguales con flexbox. */
+.projects-duo {
+    display: flex;
+    align-items: stretch;
+    gap: 1.5rem;
+    margin: 2rem auto 0;
+    max-width: 1180px;
+}
+
+.projects-duo > .project-card {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.projects-duo .magazine-viewer,
+.projects-duo .guide-viewer {
+    flex: 1;
+}
+
+@media (max-width: 900px) {
+    .projects-duo {
+        flex-direction: column;
+    }
+}
+
+.magazine-viewer,
+.guide-viewer {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.9rem;
     padding: 1.5rem 1.25rem 1.1rem;
+}
+
+/* --- Guía navegable: todas las páginas apiladas con scroll propio --- */
+.guide-scroll {
+    position: relative;
+    height: 460px;
+    max-width: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    border-radius: 6px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(205, 137, 158, 0.15);
+    background: rgba(8, 14, 32, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .guide-scroll {
+        scroll-behavior: auto;
+    }
+}
+
+.guide-pages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.guide-page {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+}
+
+.guide-page canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+}
+
+/* Enlaces reales del PDF (ej. tienda, Spotify): zona clicable transparente
+   posicionada en % sobre el render de esa página, según el rect que trae el
+   propio documento — no hace falta recalcular nada si la tarjeta cambia de
+   tamaño porque el % es relativo a la página, no a píxeles fijos. */
+.guide-page-link {
+    position: absolute;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.guide-page-link:hover,
+.guide-page-link:focus-visible {
+    background: rgba(245, 234, 227, 0.16);
 }
 
 /* --- Escenario: flechas + página --- */
@@ -393,6 +490,10 @@
         width: 32px;
         height: 32px;
     }
+
+    .guide-scroll {
+        height: 380px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -409,5 +510,9 @@
 
     .magazine-page-slot {
         height: 260px;
+    }
+
+    .guide-scroll {
+        height: 320px;
     }
 }

@@ -13,6 +13,7 @@ Reychell Perdomo, estudiante de Tecnólogo en Multimedia (ITLA). Pensado para pu
 | Robot Steampunk (3 renders) | [Proyecto "Robot Steampunk"](#proyecto-robot-steampunk-tríptico-de-ancho-completo) | `index.html`, `css/style.css` (breakpoint 900px) |
 | Artículo de periódico (franja panorámica) | [Proyecto "Artículo de periódico editorial"](#proyecto-artículo-de-periódico-editorial-franja-alargada-fuera-de-la-cuadrícula) | `index.html`, `css/style.css` (`.project-newspaper`) |
 | Revista ReVibe / flipbook | [Revista digital interactiva](#revista-digital-interactiva-flipbook) | `js/magazine.js`, `css/magazine.css` |
+| Guía navegable (scroll + enlaces reales del PDF) | [Guía navegable interactiva](#guía-navegable-interactiva-pdf-con-scroll-propio--projects-duo) | `js/magazine.js` (`GuideViewer`), `css/magazine.css` (`.guide-*`, `.projects-duo`) |
 | Formulario de contacto | [Formulario de contacto → email](#formulario-de-contacto--email) | `index.html`, `js/script.js` |
 | Colores, sombras, animaciones | [Sistema de diseño y motion](#sistema-de-diseño-y-motion-auditoría-2026-08-26) | `css/style.css` (`:root`) |
 | Accesibilidad / teclado / ARIA | [Accesibilidad](#accesibilidad-auditoría-2026-08-26) | `index.html`, `js/script.js` |
@@ -26,10 +27,11 @@ Reychell Perdomo, estudiante de Tecnólogo en Multimedia (ITLA). Pensado para pu
 4. Rutas de assets siempre con `/` y respetando mayúsculas → GitHub Pages es case-sensitive.
 5. La extensión de `download="..."` debe coincidir con el archivo real y ser única por proyecto.
 
-**Estado actual**: 9 tarjetas de proyecto (6 normales en la cuadrícula + 3 franjas panorámicas
-fuera de ella: tríptico, artículo de periódico y revista), 6 filtros
-(`branding`, `illustration`, `web`, `animation`, `3d`, `editorial`) más "Todos". Publicado en
-`reychellperdomo.lat` vía GitHub Pages (`ReychellFrontEnd/MyPortfolio`, rama `main`).
+**Estado actual**: 10 tarjetas de proyecto (6 normales en la cuadrícula + 4 fuera de ella: tríptico,
+artículo de periódico, revista y guía navegable — estas dos últimas en paralelo dentro de
+`.projects-duo`), 6 filtros (`branding`, `illustration`, `web`, `animation`, `3d`, `editorial`) más
+"Todos". Publicado en `reychellperdomo.lat` vía GitHub Pages (`ReychellFrontEnd/MyPortfolio`, rama
+`main`).
 
 **Probar local**: `python -m http.server` en la raíz y abrir `http://localhost:8000` — **no** abrir
 `index.html` con doble clic: bajo `file://` el visor de revista descarga los 88 MB del PDF completo
@@ -270,10 +272,11 @@ tarjeta) para leerse como campos hundidos, no confundirse con el fondo de la tar
 
 ## Revista digital interactiva (flipbook)
 
-Proyecto 8 dentro de Proyectos: `.project-card.project-magazine` (mismo ancho/tamaño de tarjeta
-que `.project-triptych` — 70%, máx. 780px, centrado — a pedido explícito del usuario). La franja
-inferior (`.project-details`) es deliberadamente delgada: solo `<h3>` con el nombre y un `<p>` con
-el año, sin curso/herramientas como las demás tarjetas.
+Proyecto 9 dentro de Proyectos: `.project-card.project-magazine`, hoy en paralelo con la guía
+navegable dentro de `.projects-duo` (ver sección siguiente) — antes de eso vivía sola con el mismo
+ancho que `.project-triptych` (70%, máx. 780px, centrado). La franja inferior (`.project-details`)
+es deliberadamente delgada: solo `<h3>` con el nombre y un `<p>` con el año, sin curso/herramientas
+como las demás tarjetas.
 
 - **PDF real usado**: `assets/proyectos/ReVibe_ReychellPerdomo_20241104(1).pdf` (el usuario lo
   confirmó explícitamente). El paréntesis en el nombre va codificado como `%28`/`%29` en el
@@ -353,6 +356,60 @@ el año, sin curso/herramientas como las demás tarjetas.
   64. Si en algún momento aparece un PDF distinto de 87 páginas, basta con reemplazar el archivo en
   `assets/proyectos/` y actualizar el `data-pdf`/`href` en `index.html` — no hace falta tocar
   `js/magazine.js`.
+
+## Guía navegable interactiva (PDF con scroll propio) + `.projects-duo`
+
+Proyecto 10 dentro de Proyectos: `.project-card.project-guide`, colocado **en paralelo** con la
+revista (proyecto 9) a pedido explícito del usuario — ambas tarjetas viven dentro de un mismo
+contenedor `.projects-duo` (flex, 50/50, `gap: 1.5rem`) en vez de cada una ocupando su propia franja
+de ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.projects-duo` pasa a
+`flex-direction: column` y cada tarjeta ocupa el 100% del ancho, una debajo de la otra.
+
+- **PDF real usado**: `assets/proyectos/Practicaguianavegable_ReychellPerdomo.pdf` — 4 páginas
+  carta (612×792pt), un documento de práctica de InDesign sobre el álbum "Hit Me Hard and Soft" de
+  Billie Eilish, con botones de navegación dibujados en el diseño ("IR AL CONTENIDO", ">>>",
+  "VOLVER AL INICIO"). **Ojo**: esos botones son solo gráficos — se verificó con `pymupdf` y con
+  `pdfjs-dist` en Node que el PDF **no** tiene enlaces internos de tipo "ir a la página X" (`dest`)
+  asociados a ellos. Los únicos enlaces reales que trae el archivo son 3 URLs externas (tienda de
+  Billie Eilish en las páginas 2, y Spotify en la página 3) — son esos los que el visor reproduce
+  como clicables, no una simulación de los botones de diseño.
+- **Por qué un visor distinto al de la revista**: el pedido fue explícito — "que sea posible
+  scrollear en el pdf desde afuera" (sin abrir ningún modal) — y "colocalo en paralelo con la
+  revista". Un flipbook con volteo de página no es lo mismo que poder desplazarse; por eso
+  `GuideViewer` (en `js/magazine.js`, junto a `MagazineViewer`) apila **todas** las páginas
+  verticalmente dentro de `.guide-scroll` (un `<div>` con `overflow-y: auto` propio, así el scroll
+  ocurre directamente en la tarjeta) en vez de mostrar una página/spread a la vez.
+- **Por qué se renderizan todas las páginas de una** (a diferencia de la revista, que nunca
+  renderiza todas a la vez): este PDF es corto (4 páginas) y ya se sabe de antemano — a diferencia
+  de ReVibe, que puede tener decenas/cientos de páginas y por eso sí necesita caché acotada
+  (`MAX_CACHE_PAGES`) y render bajo demanda. Aun así, el código sigue leyendo `pdfDoc.numPages` del
+  archivo real (no hay ningún "4" hardcodeado) — si el usuario reemplaza este PDF por uno más largo
+  en el futuro, seguiría funcionando, solo que sin la optimización de caché que sí tiene la revista.
+- **Enlaces reales del PDF, reproducidos como zonas clicables**: `page.getAnnotations()` (PDF.js)
+  expone las anotaciones `subtype: 'Link'` con `url`. Cada una se posiciona con el `rect` que trae
+  el propio PDF, convertido a **porcentaje** del ancho/alto de esa página (no a píxeles), usando
+  `page.view` (el mediabox, `[x0,y0,x1,y1]` en puntos) como referencia — el origen de coordenadas
+  de un PDF crece hacia arriba, el de CSS hacia abajo, así que el cálculo de `top` invierte el eje Y
+  (`(view[3] - rectY1) / alturaPágina`). Al ser porcentajes, la posición sigue siendo correcta sin
+  recalcular nada si la tarjeta cambia de tamaño (responsive, zoom del navegador, etc.). Los
+  enlaces abren en pestaña nueva (`target="_blank" rel="noopener noreferrer"`), con
+  `aria-label` que incluye el hostname (ej. "Abrir enlace externo (open.spotify.com)").
+  **No** se asume que el PDF tenga siempre enlaces (ni de qué tipo) — el código filtra por
+  `annotation.url` presente y no falla si no hay ninguno.
+- **Descarga**: igual que la revista, un botón `.magazine-download` en la barra de controles
+  (`href` al PDF real + `download="Guia_Navegable_ReychellPerdomo.pdf"`), fuera del visor en sí —
+  no depende de que PDF.js/el documento hayan cargado.
+- **Carga perezosa compartida con la revista**: ambos visores usan la misma función de módulo
+  `ensurePdfJs()` en `js/magazine.js` (antes era un método de instancia de `MagazineViewer`, se
+  extrajo a nivel de módulo con una promesa memoizada) — si las dos tarjetas entran en pantalla
+  casi al mismo tiempo (muy probable, están una al lado de la otra), pdf.js se pide **una sola vez**
+  en vez de dos veces en paralelo. Cada visor sigue disparando su propia carga de PDF (documentos
+  distintos) recién cuando su propia tarjeta está a punto de entrar en pantalla
+  (`IntersectionObserver`, `rootMargin: '600px 0px'`, mismo patrón que la revista).
+- **Indicador de página** (`Página X de N`): no hay controles de "siguiente/anterior" como en la
+  revista — el número de página actual se actualiza solo, observando con `IntersectionObserver`
+  (`root: .guide-scroll`, `threshold: 0.5`) cuál `.guide-page` está más visible mientras el usuario
+  se desplaza.
 
 ## Rendimiento general del sitio
 
