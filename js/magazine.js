@@ -805,10 +805,16 @@
      * apilan verticalmente dentro de `.guide-scroll` (un contenedor con su
      * propio `overflow-y: auto`) para poder leerla desplazándose "desde
      * afuera", sin abrir ningún modal ni cambiar de página con botones.
-     * Como el PDF real de este proyecto es corto (unas pocas páginas), se
-     * renderizan todas al cargar en vez de recortar a un cache/ventana como
-     * hace `MagazineViewer` con la revista (que sí puede tener decenas de
-     * páginas) — igual se lee `pdfDoc.numPages` del archivo, sin conteo fijo.
+     *
+     * Carga progresiva (no todo de golpe): solo la página 1 se renderiza de
+     * inmediato — es lo único que se ve al abrir la tarjeta. Las demás
+     * páginas se agregan como "placeholders" (con su alto ya reservado vía
+     * `aspect-ratio`, tomado de las dimensiones reales de cada página, para
+     * que el scroll no salte cuando el render real las reemplaza) y solo se
+     * renderizan cuando están a punto de entrar en el área visible de
+     * `.guide-scroll` (`IntersectionObserver`, igual que el resto del
+     * sitio). Así, aunque el PDF pese varios MB, el usuario nunca descarga
+     * más que lo que ya está a punto de leer.
      *
      * Enlaces reales del PDF: `page.getAnnotations()` expone las anotaciones
      * de tipo Link con URL (las que el propio documento trae, ej. una
@@ -830,11 +836,12 @@
 
             this.pdfDoc = null;
             this.totalPages = 0;
+            this.renderedPages = new Set();
 
-            // Se crea ahora (el contenedor ya existe en el HTML) pero cada
-            // página se agrega a la observación recién cuando se renderiza,
-            // más abajo en renderPage().
-            this.pageObserver = ('IntersectionObserver' in window) && this.scrollEl
+            // Actualiza "Página X de N" según qué placeholder está más
+            // visible dentro del scroll — se observa toda página, esté o no
+            // ya renderizada.
+            this.currentPageObserver = ('IntersectionObserver' in window) && this.scrollEl
                 ? new IntersectionObserver((entries) => {
                     entries.forEach((entry) => {
                         if (entry.isIntersecting && this.currentPageEl) {
@@ -842,6 +849,22 @@
                         }
                     });
                 }, { root: this.scrollEl, threshold: 0.5 })
+                : null;
+
+            // Dispara el render real de una página cuando se acerca al área
+            // visible (con margen, para que ya esté lista o casi al llegar).
+            // Se desconecta cada página apenas dispara una vez.
+            this.renderObserver = ('IntersectionObserver' in window) && this.scrollEl
+                ? new IntersectionObserver((entries, obs) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) return;
+                        obs.unobserve(entry.target);
+                        const pageNum = Number(entry.target.dataset.page);
+                        this.pdfDoc.getPage(pageNum)
+                            .then((page) => this.renderPageInto(pageNum, page, entry.target))
+                            .catch((err) => console.error(`[guide] No se pudo renderizar la página ${pageNum}:`, err));
+                    });
+                }, { root: this.scrollEl, rootMargin: '300px 0px' })
                 : null;
 
             this.bindLazyInit();
@@ -902,20 +925,55 @@
             this.totalPages = this.pdfDoc.numPages;
             if (this.totalPagesEl) this.totalPagesEl.textContent = String(this.totalPages);
 
-            for (let pageNum = 1; pageNum <= this.totalPages; pageNum += 1) {
-                // Intencional en serie (no Promise.all): pdf.js comparte un
-                // solo worker por documento, así que renderizar en paralelo
-                // no sería más rápido y sí más difícil de seguir si falla
-                // una página a mitad de camino.
-                // eslint-disable-next-line no-await-in-loop
-                await this.renderPage(pageNum);
-            }
+            // Página 1 primero y de una: es lo único que se ve al abrir la
+            // tarjeta, así que se renderiza antes de ocultar el spinner
+            // grande — el resto no debe bloquear ese primer vistazo.
+            const firstPage = await this.pdfDoc.getPage(1);
+            const firstPageEl = this.createPlaceholder(1, firstPage);
+            this.pagesEl.appendChild(firstPageEl);
+            if (this.currentPageObserver) this.currentPageObserver.observe(firstPageEl);
+            await this.renderPageInto(1, firstPage, firstPageEl);
 
             this.hideStatus();
+
+            // El resto: placeholders con su alto ya reservado (metadata de
+            // la página, no el render pesado), observados para renderizarse
+            // solo cuando el usuario se acerca desplazándose.
+            for (let pageNum = 2; pageNum <= this.totalPages; pageNum += 1) {
+                // eslint-disable-next-line no-await-in-loop
+                const page = await this.pdfDoc.getPage(pageNum);
+                const pageEl = this.createPlaceholder(pageNum, page);
+                this.pagesEl.appendChild(pageEl);
+                if (this.currentPageObserver) this.currentPageObserver.observe(pageEl);
+                if (this.renderObserver) this.renderObserver.observe(pageEl);
+            }
         }
 
-        async renderPage(pageNum) {
-            const page = await this.pdfDoc.getPage(pageNum);
+        // Reserva el alto real de la página (via aspect-ratio, tomado de
+        // page.view en puntos PDF) antes de renderizarla, para que el
+        // scroll no salte cuando el canvas real la reemplace.
+        createPlaceholder(pageNum, page) {
+            const view = page.view;
+            const pageWidthPt = view[2] - view[0];
+            const pageHeightPt = view[3] - view[1];
+
+            const pageEl = document.createElement('div');
+            pageEl.className = 'guide-page';
+            pageEl.dataset.page = String(pageNum);
+            pageEl.style.aspectRatio = `${pageWidthPt} / ${pageHeightPt}`;
+
+            const spinner = document.createElement('span');
+            spinner.className = 'guide-page-spinner magazine-spinner';
+            spinner.setAttribute('aria-hidden', 'true');
+            pageEl.appendChild(spinner);
+
+            return pageEl;
+        }
+
+        async renderPageInto(pageNum, page, pageEl) {
+            if (this.renderedPages.has(pageNum)) return;
+            this.renderedPages.add(pageNum);
+
             const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
             const targetWidthCss = this.pagesEl.clientWidth || 700;
             const unscaled = page.getViewport({ scale: 1 });
@@ -928,15 +986,14 @@
             const ctx = canvas.getContext('2d');
             await page.render({ canvasContext: ctx, viewport }).promise;
 
-            const pageEl = document.createElement('div');
-            pageEl.className = 'guide-page';
-            pageEl.dataset.page = String(pageNum);
+            const spinner = pageEl.querySelector('.guide-page-spinner');
+            if (spinner) spinner.remove();
             pageEl.appendChild(canvas);
+            // El aspect-ratio ya cumplió su función (reservar el espacio);
+            // se quita para que el alto real lo defina el canvas.
+            pageEl.style.aspectRatio = '';
 
             await this.addLinkHotspots(pageEl, page);
-
-            this.pagesEl.appendChild(pageEl);
-            if (this.pageObserver) this.pageObserver.observe(pageEl);
         }
 
         // Solo enlaces reales del PDF (URI externas) — no hay destinos de

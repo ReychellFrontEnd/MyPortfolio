@@ -379,12 +379,20 @@ de ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.pro
   `GuideViewer` (en `js/magazine.js`, junto a `MagazineViewer`) apila **todas** las páginas
   verticalmente dentro de `.guide-scroll` (un `<div>` con `overflow-y: auto` propio, así el scroll
   ocurre directamente en la tarjeta) en vez de mostrar una página/spread a la vez.
-- **Por qué se renderizan todas las páginas de una** (a diferencia de la revista, que nunca
-  renderiza todas a la vez): este PDF es corto (4 páginas) y ya se sabe de antemano — a diferencia
-  de ReVibe, que puede tener decenas/cientos de páginas y por eso sí necesita caché acotada
-  (`MAX_CACHE_PAGES`) y render bajo demanda. Aun así, el código sigue leyendo `pdfDoc.numPages` del
-  archivo real (no hay ningún "4" hardcodeado) — si el usuario reemplaza este PDF por uno más largo
-  en el futuro, seguiría funcionando, solo que sin la optimización de caché que sí tiene la revista.
+- **Carga progresiva, no todo de golpe** (auditoría de rendimiento, 2026-09-28): la primera versión
+  renderizaba las 4 páginas en serie antes de ocultar el spinner grande — como cada página del PDF
+  pesa varios MB de imagen embebida, eso significaba esperar el peso completo del archivo (~18 MB)
+  solo para ver la página 1. Se corrigió así: `loadDocument()` renderiza **solo la página 1** de
+  inmediato y recién entonces oculta el spinner; las páginas 2+ se agregan como "placeholders"
+  vacíos (`createPlaceholder()`, con su alto ya reservado vía CSS `aspect-ratio` calculado de
+  `page.view` — así el scroll no salta cuando el render real las reemplaza) y solo se renderizan
+  cuando se acercan al área visible de `.guide-scroll` (`renderObserver`, `IntersectionObserver`,
+  `rootMargin: '300px 0px'`, `root: .guide-scroll`) — el mismo patrón de "no cargar hasta que hace
+  falta" que ya usaba la revista, aplicado página por página en vez de documento por documento. El
+  código sigue leyendo `pdfDoc.numPages` del archivo real (no hay ningún "4" hardcodeado); si el
+  usuario reemplaza este PDF por uno más largo, el patrón de placeholders + render bajo demanda
+  escala sin tocar el código (a diferencia de antes, que si hubiera sido un PDF largo habría sido
+  aún más lento al esperar todas las páginas).
 - **Enlaces reales del PDF, reproducidos como zonas clicables**: `page.getAnnotations()` (PDF.js)
   expone las anotaciones `subtype: 'Link'` con `url`. Cada una se posiciona con el `rect` que trae
   el propio PDF, convertido a **porcentaje** del ancho/alto de esa página (no a píxeles), usando
@@ -413,16 +421,32 @@ de ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.pro
 
 ## Rendimiento general del sitio
 
+- **Imágenes de proyectos: copia optimizada para mostrar en la página, original intacto solo para
+  descargar** (auditoría 2026-09-28) — varias fotos de proyectos se subieron directo desde su
+  fuente (renders 3D, exportes de InDesign) sin redimensionar: `Desktop_Infografia_ReychellPerdomo.jpg`
+  pesaba **12 MB** (6600×5100px) para mostrarse en una tarjeta de 250px de alto. Se generó una copia
+  `*_web.jpg` de cada imagen pesada (redimensionada a ~1600–2000px de lado largo, JPEG calidad
+  82–85, los renders PNG con canal alfa 100% opaco pasaron a JPEG sin pérdida visible) y **solo el
+  `<img src>` y el `data-src` del botón "Ver" apuntan a esa copia** — el `href download` de cada
+  proyecto sigue apuntando al archivo original sin tocar, así que descargar el proyecto sigue
+  entregando la calidad completa. Mismo patrón que ya se usaba para "Artículo de periódico
+  editorial" y "Poster vectorizado" (ver [Descargas de proyectos](#descargas-de-proyectos)), ahora
+  aplicado también a: Infografía (12 MB → 460 KB), Poster "Dark" (1.5 MB → 212 KB), ilustración
+  Spider-Man (1.2 MB → 372 KB) y los 3 renders del Robot Steampunk (2–3.3 MB cada uno → 100–184 KB,
+  además convertidos de PNG a JPEG). **Si se reemplaza alguno de estos archivos en el futuro**, hay
+  que regenerar su `_web.jpg` a mano (redimensionar + recomprimir) — no hay ningún paso de build
+  que lo haga solo; los scripts usados fueron ad-hoc con Pillow, no quedaron guardados en el repo.
 - **El visor de revista (PDF.js) ya no carga hasta que hace falta**: antes se inicializaba
   apenas cargaba la página (aunque el usuario nunca bajara hasta Proyectos), descargando ~1MB de
   PDF.js de una vez. Ahora `bindLazyInit()` en `js/magazine.js` usa un `IntersectionObserver`
   (`rootMargin: '600px'`) y solo dispara `loadLibraryThenDocument()` cuando la tarjeta está a
   punto de entrar en pantalla.
 - **Imágenes de proyectos con `loading="lazy" decoding="async"`**: todas las fotos de
-  `.project-card` (los 6 proyectos + los 3 renders del robot) — varias pesan varios MB cada una,
-  y antes se descargaban todas de inmediato aunque estuvieran muy abajo en la página. El logo del
-  navbar y el banner del hero se dejaron sin `lazy` a propósito porque están arriba del todo
-  (cargarlos diferido solo los retrasaría sin necesidad).
+  `.project-card` (los 6 proyectos + los 3 renders del robot) — antes se descargaban todas de
+  inmediato aunque estuvieran muy abajo en la página; ahora, además de diferirse, ya pesan poco
+  gracias al punto anterior (`*_web.jpg`). El logo del navbar y el banner del hero se dejaron sin
+  `lazy` a propósito porque están arriba del todo (cargarlos diferido solo los retrasaría sin
+  necesidad).
 - **Font Awesome y Google Fonts ya no bloquean el primer render**: se cambiaron de
   `rel="stylesheet"` directo a `rel="preload"` + `onload` que cambia el `rel` a `stylesheet` (con
   `<noscript>` de respaldo si JS está desactivado). Es seguro aquí porque el hero es una sola

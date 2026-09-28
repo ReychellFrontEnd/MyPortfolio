@@ -105,6 +105,18 @@
     position: relative;
     width: 100%;
     line-height: 0;
+    background: rgba(16, 30, 66, 0.4);
+    border-radius: 3px;
+}
+
+/* Placeholder mientras esa página todavía no se renderiza (ver
+   GuideViewer.createPlaceholder en js/magazine.js): el aspect-ratio ya
+   reserva el alto correcto, este spinner solo indica que está por venir. */
+.guide-page-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .guide-page canvas {
