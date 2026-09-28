@@ -806,15 +806,22 @@
      * propio `overflow-y: auto`) para poder leerla desplazándose "desde
      * afuera", sin abrir ningún modal ni cambiar de página con botones.
      *
-     * Carga progresiva (no todo de golpe): solo la página 1 se renderiza de
-     * inmediato — es lo único que se ve al abrir la tarjeta. Las demás
+     * Carga progresiva (no todo de golpe, pero tampoco lenta): solo la
+     * página 1 se renderiza de inmediato — es lo único que se ve al abrir
+     * la tarjeta, así que nada más bloquea que se muestre. Las demás
      * páginas se agregan como "placeholders" (con su alto ya reservado vía
      * `aspect-ratio`, tomado de las dimensiones reales de cada página, para
-     * que el scroll no salte cuando el render real las reemplaza) y solo se
-     * renderizan cuando están a punto de entrar en el área visible de
-     * `.guide-scroll` (`IntersectionObserver`, igual que el resto del
-     * sitio). Así, aunque el PDF pese varios MB, el usuario nunca descarga
-     * más que lo que ya está a punto de leer.
+     * que el scroll no salte cuando el render real las reemplaza) y se
+     * renderizan **todas a la vez, en paralelo, en segundo plano**, apenas
+     * termina la página 1 — no se espera a que el usuario se desplace hasta
+     * cada una. Se probó primero renderizarlas de una en una según se
+     * acercaban al scroll (`IntersectionObserver`), pero como el
+     * documento es corto (unas pocas páginas) eso hacía que las últimas
+     * (3, 4...) tardaran notoriamente más en aparecer que las primeras —
+     * cada una esperaba a que el usuario llegara desplazándose para recién
+     * empezar a pedirse. Pidiéndolas todas de una, el navegador las
+     * descarga en paralelo (HTTP/2 multiplexa varias peticiones a la vez)
+     * y ya están listas —o casi— para cuando el usuario llega a ellas.
      *
      * Enlaces reales del PDF: `page.getAnnotations()` expone las anotaciones
      * de tipo Link con URL (las que el propio documento trae, ej. una
@@ -849,22 +856,6 @@
                         }
                     });
                 }, { root: this.scrollEl, threshold: 0.5 })
-                : null;
-
-            // Dispara el render real de una página cuando se acerca al área
-            // visible (con margen, para que ya esté lista o casi al llegar).
-            // Se desconecta cada página apenas dispara una vez.
-            this.renderObserver = ('IntersectionObserver' in window) && this.scrollEl
-                ? new IntersectionObserver((entries, obs) => {
-                    entries.forEach((entry) => {
-                        if (!entry.isIntersecting) return;
-                        obs.unobserve(entry.target);
-                        const pageNum = Number(entry.target.dataset.page);
-                        this.pdfDoc.getPage(pageNum)
-                            .then((page) => this.renderPageInto(pageNum, page, entry.target))
-                            .catch((err) => console.error(`[guide] No se pudo renderizar la página ${pageNum}:`, err));
-                    });
-                }, { root: this.scrollEl, rootMargin: '300px 0px' })
                 : null;
 
             this.bindLazyInit();
@@ -937,16 +928,26 @@
             this.hideStatus();
 
             // El resto: placeholders con su alto ya reservado (metadata de
-            // la página, no el render pesado), observados para renderizarse
-            // solo cuando el usuario se acerca desplazándose.
+            // la página, liviana) y luego TODAS se mandan a renderizar de
+            // una, en paralelo y sin esperar a que terminen (no se hace
+            // `await` de `renderPageInto` aquí) — así el navegador pide sus
+            // imágenes al mismo tiempo en vez de una recién cuando el
+            // usuario se acerca a la anterior.
+            const renders = [];
             for (let pageNum = 2; pageNum <= this.totalPages; pageNum += 1) {
+                // El `getPage` en sí es liviano (solo metadata), así que
+                // mantenerlo en serie aquí no retrasa nada real.
                 // eslint-disable-next-line no-await-in-loop
                 const page = await this.pdfDoc.getPage(pageNum);
                 const pageEl = this.createPlaceholder(pageNum, page);
                 this.pagesEl.appendChild(pageEl);
                 if (this.currentPageObserver) this.currentPageObserver.observe(pageEl);
-                if (this.renderObserver) this.renderObserver.observe(pageEl);
+                renders.push(this.renderPageInto(pageNum, page, pageEl));
             }
+
+            await Promise.all(renders).catch((err) => {
+                console.error('[guide] No se pudieron precargar todas las páginas:', err);
+            });
         }
 
         // Reserva el alto real de la página (via aspect-ratio, tomado de

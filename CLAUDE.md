@@ -411,20 +411,33 @@ ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.projec
   `GuideViewer` (en `js/magazine.js`, junto a `MagazineViewer`) apila **todas** las páginas
   verticalmente dentro de `.guide-scroll` (un `<div>` con `overflow-y: auto` propio, así el scroll
   ocurre directamente en la tarjeta) en vez de mostrar una página/spread a la vez.
-- **Carga progresiva, no todo de golpe** (auditoría de rendimiento, 2026-09-28): la primera versión
-  renderizaba las 4 páginas en serie antes de ocultar el spinner grande — como cada página del PDF
-  pesa varios MB de imagen embebida, eso significaba esperar el peso completo del archivo (~18 MB)
-  solo para ver la página 1. Se corrigió así: `loadDocument()` renderiza **solo la página 1** de
-  inmediato y recién entonces oculta el spinner; las páginas 2+ se agregan como "placeholders"
-  vacíos (`createPlaceholder()`, con su alto ya reservado vía CSS `aspect-ratio` calculado de
-  `page.view` — así el scroll no salta cuando el render real las reemplaza) y solo se renderizan
-  cuando se acercan al área visible de `.guide-scroll` (`renderObserver`, `IntersectionObserver`,
-  `rootMargin: '300px 0px'`, `root: .guide-scroll`) — el mismo patrón de "no cargar hasta que hace
-  falta" que ya usaba la revista, aplicado página por página en vez de documento por documento. El
-  código sigue leyendo `pdfDoc.numPages` del archivo real (no hay ningún "4" hardcodeado); si el
-  usuario reemplaza este PDF por uno más largo, el patrón de placeholders + render bajo demanda
-  escala sin tocar el código (a diferencia de antes, que si hubiera sido un PDF largo habría sido
-  aún más lento al esperar todas las páginas).
+- **Carga: página 1 de inmediato, el resto en paralelo en segundo plano** (auditoría de
+  rendimiento, 2026-09-28, dos vueltas):
+  1. Primera versión: renderizaba las 4 páginas en serie antes de ocultar el spinner grande — como
+     cada página pesa varios MB de imagen embebida, eso significaba esperar el peso completo del
+     archivo (~18 MB) solo para ver la página 1.
+  2. Segunda versión: se corrigió para que `loadDocument()` renderizara **solo la página 1** de
+     inmediato (ocultando el spinner ahí mismo) y dejara las páginas 2+ como "placeholders" que
+     solo se renderizaban al acercarse al área visible del scroll (`IntersectionObserver`,
+     `rootMargin: '300px 0px'`) — pero para un documento corto (4 páginas) esto tuvo un efecto
+     secundario: cada página recién empezaba a pedirse cuando el usuario llegaba desplazándose
+     hasta ella, así que las últimas (3, 4) tardaban notoriamente más en aparecer que las
+     primeras — el usuario reportó exactamente eso.
+  3. **Versión actual**: la página 1 se sigue renderizando primero y de inmediato (mismo
+     comportamiento, el spinner grande se oculta ahí), pero las páginas 2+ ya no esperan a que el
+     usuario se acerque — se piden **todas a la vez, en paralelo** apenas termina la página 1
+     (`Promise.all` sobre `renderPageInto()` para cada una, sin `IntersectionObserver` de por
+     medio). El navegador las descarga en paralelo (HTTP/2 multiplexa varias peticiones a la vez
+     sobre la misma conexión), así que para cuando el usuario llega a la página 3 o 4
+     desplazándose, ya están listas o casi. Los placeholders (`createPlaceholder()`, alto
+     reservado vía CSS `aspect-ratio` calculado de `page.view`, para que el scroll no salte) se
+     mantienen igual — solo cambió CUÁNDO se dispara el render real de cada uno.
+  El código sigue leyendo `pdfDoc.numPages` del archivo real (no hay ningún "4" hardcodeado); si
+  el usuario reemplaza este PDF por uno bastante más largo en el futuro, "renderizar todo en
+  paralelo apenas carga" dejaría de tener sentido (sería la misma sobrecarga que la primera
+  versión, solo que en paralelo) — en ese caso, conviene volver a un render bajo demanda por
+  cercanía de scroll (como tiene la revista con su caché acotada), no simplemente aumentar el
+  número de páginas que se piden de una.
 - **Enlaces reales del PDF, reproducidos como zonas clicables**: `page.getAnnotations()` (PDF.js)
   expone las anotaciones `subtype: 'Link'` con `url`. Cada una se posiciona con el `rect` que trae
   el propio PDF, convertido a **porcentaje** del ancho/alto de esa página (no a píxeles), usando
