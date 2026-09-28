@@ -11,6 +11,7 @@ Reychell Perdomo, estudiante de Tecnólogo en Multimedia (ITLA). Pensado para pu
 | Navbar, logo, menú móvil | [Navbar y logo](#navbar-y-logo) | `index.html`, `css/style.css`, `js/script.js` |
 | Agregar/editar un proyecto | [Descargas de proyectos](#descargas-de-proyectos) | `index.html` (grid `.projects-grid`) |
 | Robot Steampunk (3 renders) | [Proyecto "Robot Steampunk"](#proyecto-robot-steampunk-tríptico-de-ancho-completo) | `index.html`, `css/style.css` (breakpoint 900px) |
+| Artículo de periódico (franja panorámica) | [Proyecto "Artículo de periódico editorial"](#proyecto-artículo-de-periódico-editorial-franja-alargada-fuera-de-la-cuadrícula) | `index.html`, `css/style.css` (`.project-newspaper`) |
 | Revista ReVibe / flipbook | [Revista digital interactiva](#revista-digital-interactiva-flipbook) | `js/magazine.js`, `css/magazine.css` |
 | Formulario de contacto | [Formulario de contacto → email](#formulario-de-contacto--email) | `index.html`, `js/script.js` |
 | Colores, sombras, animaciones | [Sistema de diseño y motion](#sistema-de-diseño-y-motion-auditoría-2026-08-26) | `css/style.css` (`:root`) |
@@ -25,7 +26,8 @@ Reychell Perdomo, estudiante de Tecnólogo en Multimedia (ITLA). Pensado para pu
 4. Rutas de assets siempre con `/` y respetando mayúsculas → GitHub Pages es case-sensitive.
 5. La extensión de `download="..."` debe coincidir con el archivo real y ser única por proyecto.
 
-**Estado actual**: 9 tarjetas de proyecto (7 normales + tríptico + revista), 6 filtros
+**Estado actual**: 9 tarjetas de proyecto (6 normales en la cuadrícula + 3 franjas panorámicas
+fuera de ella: tríptico, artículo de periódico y revista), 6 filtros
 (`branding`, `illustration`, `web`, `animation`, `3d`, `editorial`) más "Todos". Publicado en
 `reychellperdomo.lat` vía GitHub Pages (`ReychellFrontEnd/MyPortfolio`, rama `main`).
 
@@ -98,16 +100,37 @@ Cada tarjeta de proyecto tiene un botón "Ver" (abre el modal con la imagen) y u
   imágenes de otro dominio) — todas las imágenes de proyectos son locales, así que esto ya está
   garantizado.
 - **Proyectos cuyo archivo fuente es un PDF sin imagen propia** (ej. "Artículo de periódico
-  editorial", proyecto 7): la tarjeta necesita igual una `<img>` para `.project-image` (la
-  cuadrícula no soporta un PDF como fondo). El patrón ya existente (usado también por "Poster
-  vectorizado", proyecto 3) es que el `data-src` del botón "Ver" y el `src` de la miniatura pueden
-  apuntar a un **JPG** mientras el enlace "Descargar" apunta al **PDF real** — no tienen que
-  coincidir entre sí, solo cada uno con su propio `download="..."`/tipo. Para "Artículo de
-  periódico" la miniatura (`Newspaperarticle_Desktop_ReychellPerdomo_thumb.jpg`) se generó
-  renderizando la única página del PDF (`Newspaperarticle_Desktop_ReychellPerdomo.pdf`, un spread
-  de 2 páginas de periódico maquetado como una sola página ancha, 1584×1224pt) a 150dpi con
-  `pymupdf` — si el usuario reemplaza ese PDF por otro, hay que regenerar el `_thumb.jpg` a mano
-  (no hay ningún paso de build que lo haga automáticamente).
+  editorial"): la tarjeta necesita igual una `<img>` para `.project-image` (la cuadrícula no
+  soporta un PDF como fondo). El patrón ya existente (usado también por "Poster vectorizado",
+  proyecto 3) es que el `data-src` del botón "Ver" y el `src` de la miniatura pueden apuntar a un
+  **JPG** mientras el enlace "Descargar" apunta al **PDF real** — no tienen que coincidir entre sí,
+  solo cada uno con su propio `download="..."`/tipo. Para "Artículo de periódico" la miniatura
+  (`Newspaperarticle_Desktop_ReychellPerdomo_thumb.jpg`) se generó renderizando la única página del
+  PDF (`Newspaperarticle_Desktop_ReychellPerdomo.pdf`, un spread de 2 páginas de periódico
+  maquetado como una sola página ancha, 1584×1224pt) a 150dpi con `pymupdf` — si el usuario
+  reemplaza ese PDF por otro, hay que regenerar el `_thumb.jpg` a mano (no hay ningún paso de build
+  que lo haga automáticamente).
+
+### Proyecto "Artículo de periódico editorial" (franja alargada, fuera de la cuadrícula)
+
+Igual que el tríptico de abajo, este proyecto **no vive dentro de `.projects-grid`**: es un
+hermano suyo con clase `project-newspaper` (además de `project-card reveal`), `data-category`
+`editorial`. La razón: el spread de periódico es panorámico (proporción real 1584×1224pt, ~22:17)
+y dentro de una celda normal de `.project-image` (250px de alto, `object-fit: cover`) se recortaba
+tanto que el titular quedaba ilegible incluso antes de abrir el modal — el usuario pidió
+explícitamente que se viera "más alargado y centrado" para que fuera "apreciable y legible desde
+afuera" (sin tener que hacer clic en "Ver").
+
+- `.project-newspaper` reutiliza el mismo ancho que `.project-triptych`/`.project-magazine` (70%,
+  máx. 780px, centrado con `margin: auto`) — ver `css/style.css`.
+- `.project-newspaper .project-image` cambia `height: 250px` (fijo) por
+  `aspect-ratio: 22 / 17` (la proporción exacta del PDF) + `object-fit: contain`, así el spread se
+  ve completo, sin recortar ningún borde, a cualquier ancho de card. Si en el futuro se reemplaza
+  el PDF/JPG por uno de otra proporción, `contain` sigue sin recortar (solo aparecerán franjas del
+  fondo `rgba(8, 14, 32, 0.55)` a los lados o arriba/abajo) — no hace falta tocar el CSS.
+- Responsive: en `≤900px` (mismo breakpoint que el tríptico) pasa a `width: 100%` para ocupar todo
+  el ancho de la sección, igual que en escritorio pero sin el límite de 780px.
+- El texto de `.project-details` se centra (mismo patrón que tríptico/revista).
 
 ### Proyecto "Robot Steampunk" (tríptico de ancho completo)
 

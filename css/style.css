@@ -763,6 +763,35 @@ h3 {
     justify-content: center;
 }
 
+/* Artículo de periódico: igual que el tríptico, vive fuera de la cuadrícula en
+   una franja alargada y centrada — el spread de periódico es panorámico y se
+   recortaría demasiado (e ilegible) dentro de una celda normal de 250px de
+   alto. `aspect-ratio` usa la proporción real del PDF (1584×1224pt) y
+   `object-fit: contain` muestra el spread completo sin recortarlo. */
+.project-newspaper {
+    margin: 2rem auto 0;
+    width: 70%;
+    max-width: 780px;
+}
+
+.project-newspaper .project-image {
+    height: auto;
+    aspect-ratio: 22 / 17;
+}
+
+.project-newspaper .project-image img {
+    object-fit: contain;
+    background: rgba(8, 14, 32, 0.55);
+}
+
+.project-newspaper .project-details {
+    text-align: center;
+}
+
+.project-newspaper .project-details p {
+    justify-content: center;
+}
+
 .action-btn {
     padding: 0.7rem 1.5rem;
     border-radius: var(--border-radius);
@@ -1294,6 +1323,11 @@ h3 {
     }
 
     .project-triptych {
+        width: 100%;
+        max-width: none;
+    }
+
+    .project-newspaper {
         width: 100%;
         max-width: none;
     }
