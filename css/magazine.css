@@ -2,7 +2,7 @@
    PDF.js. Mismo ancho/alto de tarjeta que .project-triptych (Robot
    Steampunk): 70% del contenedor, máx. 780px, centrado — salvo cuando van
    en paralelo dentro de .projects-duo (ver más abajo), donde cada uno cede
-   ese ancho fijo para repartirse el espacio 60/40 (revista/guía) con
+   ese ancho fijo para repartirse el espacio 2:1 (revista/guía) con
    flexbox. La franja inferior (.project-details) es deliberadamente
    delgada en ambos: solo nombre + año. */
 
@@ -34,11 +34,15 @@
 /* Revista + guía navegable lado a lado en escritorio (una franja de ancho
    completo, como el tríptico, pero repartida entre dos tarjetas en vez de
    una). Cada tarjeta cede su ancho fijo del 70%/780px para repartirse el
-   espacio de .projects-duo con flexbox — no en partes iguales: la revista
-   muestra un spread de DOS páginas (el doble de ancho "natural" que una
-   página suelta de la guía) así que recibe más proporción (3:2, ~60/40)
-   para que el spread no se vea apiñado; la guía sigue siendo perfectamente
-   legible más angosta porque solo muestra una página a la vez. */
+   espacio de .projects-duo con flexbox — no en partes iguales: el PDF de
+   la revista viene maquetado en pliegos (cada página interior es un
+   spread panorámico, ~1.55:1 de ancho/alto — ver el comentario en
+   js/magazine.js sobre `singleMode`) y por eso necesita bastante más
+   ancho que una sola página portrait de la guía para verse "a simple
+   vista" sin quedar chica — de ahí el reparto 2:1 (66/33) en vez de
+   partes iguales. La guía sigue siendo perfectamente legible más angosta
+   porque su contenido es vertical (una página carta a la vez, sin flechas
+   laterales que le resten ancho como sí tiene la revista). */
 .projects-duo {
     display: flex;
     align-items: stretch;
@@ -57,11 +61,11 @@
 }
 
 .projects-duo .project-magazine {
-    flex: 3 1 0;
+    flex: 2 1 0;
 }
 
 .projects-duo .project-guide {
-    flex: 2 1 0;
+    flex: 1 1 0;
 }
 
 .projects-duo .magazine-viewer,
@@ -171,7 +175,7 @@
 
 .magazine-page-slot {
     position: relative;
-    height: 360px;
+    height: 400px;
     max-width: 100%;
     border-radius: 6px;
     overflow: hidden;

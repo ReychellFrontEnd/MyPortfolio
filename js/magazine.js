@@ -10,17 +10,17 @@
  *    número total de páginas se lee del propio PDF (`pdfDoc.numPages`) — no
  *    hay ningún conteo fijo en el código.
  *
- *    Modo de vista:
- *    - En pantallas anchas (>900px) se muestran DOS páginas abiertas a la
- *      vez (un "spread"), emparejadas como (1,2) (3,4) (5,6)... y el volteo
- *      anima el spread completo girando sobre su propio centro (el "lomo"),
- *      como si todo el libro rotara sobre esa línea — más simple y
- *      confiable de implementar sin poder probarlo en un navegador real que
- *      animar cada página contra el lomo por separado, y da la misma
- *      sensación de "libro abierto" pedida.
- *    - En pantallas angostas (≤900px, mismo quiebre que el resto del sitio)
- *      se cae a una sola página visible, porque dos páginas ahí no cabrían
- *      con texto legible.
+ *    Modo de vista: **una sola página a la vez, siempre** (`singleMode`
+ *    fijo en `true`, ver el constructor) — el PDF real de este proyecto ya
+ *    viene maquetado en pliegos (cada página interior del archivo ES un
+ *    spread completo, el doble de ancho que la portada), así que emparejar
+ *    dos "páginas" del PDF como si fueran páginas sueltas de libro
+ *    terminaba mostrando dos pliegos ya anchos juntos, diminutos e
+ *    ilegibles (a pedido explícito del usuario, 2026-09-28, se cambió de
+ *    "dos páginas en escritorio / una en móvil" a "siempre una"). La
+ *    animación de volteo sigue girando sobre el centro del spread (el
+ *    "lomo") aunque ahora ese spread tenga una sola página — mismo código
+ *    de animación, sin cambios ahí.
  *
  *    Decisiones de alcance adicionales:
  *    - El zoom es un `transform: scale()` sobre las páginas ya renderizadas,
@@ -48,7 +48,6 @@
     const ZOOM_STEP = 0.15;
     const MAX_CACHE_PAGES = 16;
     const SWIPE_THRESHOLD = 45;
-    const SINGLE_MODE_QUERY = '(max-width: 900px)';
 
     // ---------- Carga de pdf.js (compartida entre todos los visores) ----------
     // pdf.js es un singleton global (`window.pdfjsLib`): si el visor de
@@ -148,16 +147,28 @@
             this.thumbsBuilt = false;
             this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            this.singleModeQuery = window.matchMedia(SINGLE_MODE_QUERY);
-            this.singleMode = this.singleModeQuery.matches;
-            this.root.classList.toggle('is-single', this.singleMode);
+            // El PDF real (ReVibe) ya viene maquetado en pliegos: cada página
+            // interior del archivo ES un spread completo (1224×792pt, el
+            // doble de ancho que la portada/contraportada a 612×792pt), no
+            // una página suelta de libro. Mostrar dos "páginas" de este PDF
+            // lado a lado (como si fueran páginas sueltas de un libro)
+            // terminaba juntando dos pliegos ya anchos en una sola vista
+            // — se veía diminuto e ilegible. Por eso el modo de una sola
+            // página (antes solo para ≤900px) queda fijo siempre, sin
+            // importar el ancho de pantalla. Se deja el resto de la lógica
+            // de spreads de 2 páginas en `getSpread()` sin borrar (nunca se
+            // alcanza mientras `singleMode` sea `true`) por si en el futuro
+            // se vuelve a usar un PDF que sí esté maquetado como páginas
+            // sueltas — ya pasó dos veces en este proyecto que se reemplaza
+            // este PDF por otra exportación.
+            this.singleMode = true;
+            this.root.classList.add('is-single');
 
             this.bindControls();
             this.bindKeyboard();
             this.bindSwipe();
             this.bindFullscreen();
             this.bindPageClick();
-            this.bindResponsive();
 
             this.bindLazyInit();
         }
@@ -291,10 +302,10 @@
 
         // ---------- Paginación en spreads (páginas dobles) ----------
 
-        // Portada (página 1) sola, luego pares reales de libro: (2,3) (4,5)
-        // (6,7)... Si el total de páginas es par, la última queda sola (como
-        // contraportada) porque el conteo de páginas interiores es impar.
-        // En modo de una sola página, cada "spread" tiene una única página.
+        // `singleMode` queda fijo en `true` (ver el comentario en el
+        // constructor) así que esta función siempre devuelve `[page]` — el
+        // resto (pares de libro (2,3) (4,5)...) no se alcanza nunca hoy,
+        // se deja solo por si en el futuro se vuelve a necesitar.
         getSpread(page) {
             if (this.singleMode) return [page];
             if (page <= 1) return [1];
@@ -550,30 +561,6 @@
 
             if (this.zoomInBtn) this.zoomInBtn.disabled = this.zoom >= ZOOM_MAX - 0.001;
             if (this.zoomOutBtn) this.zoomOutBtn.disabled = this.zoom <= ZOOM_MIN + 0.001;
-        }
-
-        // ---------- Modo responsive (spread ↔ una sola página) ----------
-
-        bindResponsive() {
-            const onChange = () => {
-                const wasSingle = this.singleMode;
-                this.singleMode = this.singleModeQuery.matches;
-                this.root.classList.toggle('is-single', this.singleMode);
-
-                if (wasSingle !== this.singleMode && this.pdfDoc) {
-                    // Al cambiar de modo, el "spread" bajo el mismo currentPage
-                    // puede incluir/perder una página — re-renderiza tal cual.
-                    this.renderSpread(this.getSpread(this.currentPage));
-                    this.updateControls();
-                }
-            };
-
-            if (typeof this.singleModeQuery.addEventListener === 'function') {
-                this.singleModeQuery.addEventListener('change', onChange);
-            } else if (typeof this.singleModeQuery.addListener === 'function') {
-                // Safari antiguo.
-                this.singleModeQuery.addListener(onChange);
-            }
         }
 
         // ---------- Zoom ----------

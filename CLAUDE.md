@@ -337,20 +337,33 @@ como las demás tarjetas.
   `backface-visibility: hidden`, una pre-rotada 180° en reposo — técnica estándar de "flip card"),
   no con una librería de flipbook de terceros (el usuario pidió inspirarse en el visor "FlipBook"
   de dFlip/dearFlip que usa intec.edu.do, pero se implementó el efecto propio, no esa librería).
-- **Spread de 2 páginas abiertas** (`.magazine-spread`: `.magazine-page-left` + `.magazine-spine`
-  + `.magazine-page-right`) en pantallas >900px, para que se sienta como un libro real. Emparejado
-  con la convención real de un libro/revista: **la portada (página 1) va sola**, y desde ahí en
-  adelante pares (2,3) (4,5) (6,7)... — si el total de páginas es par, la última queda sola como
-  contraportada (`getSpread()` en `js/magazine.js`, con la lógica documentada ahí mismo). Aunque el
-  visor esté en modo de dos páginas, cualquier spread "solo" (portada/contraportada) colapsa la
-  mitad derecha dinámicamente vía la clase `is-lone` (`applyLoneState()`), que se aplica al cargar,
-  al navegar (al terminar el volteo, no a mitad de animación — si no, la página entrante/saliente
-  se vería cortada) y al cambiar de modo responsive.
-  El volteo anima **todo el spread como una sola pieza**, rotando sobre su propio centro (el lomo)
-  — más simple y confiable que animar cada página contra el lomo por separado. En `≤900px` (mismo
-  quiebre que el resto del sitio) cae a una sola página (`root.classList('is-single')`, ver
-  `SINGLE_MODE_QUERY` en el JS), reevaluado en vivo con un listener de `matchMedia` — no hace falta
-  recargar la página para que cambie de modo.
+- **Una sola página a la vez, siempre** (`singleMode` fijo en `true` en el constructor de
+  `MagazineViewer`, `js/magazine.js`) — **cambió el 2026-09-28** a pedido explícito del usuario.
+  Antes se mostraban dos páginas del PDF abiertas lado a lado (`.magazine-spread`:
+  `.magazine-page-left` + `.magazine-spine` + `.magazine-page-right`) en pantallas >900px, emulando
+  un libro real (portada sola, luego pares (2,3) (4,5)...), cayendo a una sola página en `≤900px`.
+  Eso funcionaba bien mientras el PDF traía páginas sueltas de libro — pero el archivo real de
+  ReVibe está maquetado **en pliegos**: cada página interior del PDF ya es un spread completo
+  (1224×792pt, el doble de ancho que la portada/contraportada a 612×792pt). Emparejar dos páginas
+  del PDF como si fueran páginas sueltas terminaba mostrando **dos pliegos ya anchos juntos**
+  (ratio ~3.1:1) dentro de la misma tarjeta — se veía diminuto e ilegible. La solución fue dejar de
+  emparejar del todo: ahora cada "spread" tiene siempre 1 sola página, sea la portada/contraportada
+  (portrait) o un pliego interior (panorámico, ~1.55:1) — se ve grande y legible de cualquiera de
+  las dos formas, sin necesitar detectar qué tipo de página es.
+  - Se quitó `bindResponsive()` (el listener de `matchMedia` que alternaba el modo) y la constante
+    `SINGLE_MODE_QUERY`/`singleModeQuery`, ya sin uso — `singleMode` no vuelve a cambiar en tiempo
+    de ejecución.
+  - **La lógica de pares de 2 páginas (`getSpread()`, `is-lone`/`applyLoneState()`) se dejó en el
+    código, no se borró** — es inalcanzable mientras `singleMode` sea `true` (el primer `if` de
+    `getSpread()` corta ahí), pero se conserva comentada por si en el futuro se vuelve a usar un
+    PDF con páginas sueltas de libro (este PDF en particular ya se reemplazó dos veces en esta
+    conversación).
+  - El volteo sigue animando **todo el spread como una sola pieza**, rotando sobre su propio centro
+    (el lomo) — el código de animación no cambió, solo que ahora el "spread" siempre tiene 1 página.
+  - **Tamaño**: para que un pliego panorámico se vea "a simple vista" hace falta bastante más ancho
+    que el que necesitaba el spread de 2 páginas portrait de antes (ver el reparto 2:1 en
+    `.projects-duo` más abajo, y el comentario extenso sobre esto en `css/magazine.css`) — la
+    altura base de `.magazine-page-slot` en escritorio también subió de 360px a 400px.
   Ver el comentario al inicio de `js/magazine.js` para el resto de las decisiones de alcance (sin
   pinch-to-zoom táctil, zoom por `transform: scale()` en vez de re-render de PDF.js, etc.).
 - **Bug encontrado y corregido (pantalla de carga trabada en 100%)**: el progreso de descarga podía
@@ -413,20 +426,27 @@ contenedor `.projects-duo` (flex, `gap: 1.5rem`) en vez de cada una ocupando su 
 ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.projects-duo` pasa a
 `flex-direction: column` y cada tarjeta ocupa el 100% del ancho, una debajo de la otra.
 
-- **Reparto 60/40, no 50/50** (a pedido explícito del usuario — "que la tarjeta de la revista sea
-  más ancha... sin perder el estilo... que siga en paralelo"): `.projects-duo .project-magazine`
-  usa `flex: 3 1 0` y `.projects-duo .project-guide` usa `flex: 2 1 0`. La razón del reparto
-  desigual (no solo "porque lo pidió así"): la revista muestra un **spread de dos páginas** (el
-  doble de ancho "natural" que una sola página) mientras que la guía solo muestra una página a la
-  vez — con 50/50 el spread quedaba más apretado que la guía para el mismo espacio recibido.
-  También se bajó la altura base de `.magazine-page-slot` de 400px a 360px (**solo la regla base,
-  no las de los media queries ≤900px/≤480px**, que ya tenían su propio valor menor y siguen
-  ganando ahí por especificidad) para que el ancho "natural" del spread quepa mejor en la columna
-  más angosta que le toca ahora. Y se agregó `object-fit: contain` a `.magazine-canvas`: si aun así
-  el contenedor quedara más angosto que ese ancho natural (ventanas de escritorio angostas, entre
-  ~900 y ~1100px), `max-width: 100%` recorta el ancho pero **no** el alto (`height: 100%` fijo) —
-  sin `object-fit`, eso se ve como el spread apachurrado/distorsionado horizontalmente; con
-  `object-fit: contain` en cambio se ve más chico pero con la proporción correcta, nunca deformado.
+- **Reparto desigual, no 50/50** — el ancho se reparte con flexbox y fue cambiando en dos pasos:
+  1. Primero 50/50 → **60/40** (`flex: 3 1 0` / `flex: 2 1 0`) a pedido explícito del usuario ("que
+     la tarjeta de la revista sea más ancha"), cuando la revista todavía mostraba un spread de DOS
+     páginas de libro (el doble de ancho "natural" que la única página de la guía).
+  2. Luego, al pasar la revista a **una sola página siempre** (ver la sección de arriba —
+     "Una sola página a la vez, siempre") porque el PDF real está maquetado en pliegos, un pliego
+     individual (~1.55:1) sigue necesitando bastante más ancho que la página portrait de la guía
+     (~0.77:1), así que el reparto subió otra vez a **2:1** (66/33): `.projects-duo .project-magazine`
+     usa `flex: 2 1 0` y `.projects-duo .project-guide` usa `flex: 1 1 0`. También subió la altura
+     base de `.magazine-page-slot` de 360px a **400px** (solo la regla base para escritorio; los
+     media queries ≤900px/≤480px conservan su propio valor menor y siguen ganando ahí por
+     especificidad). Ambos cambios se verificaron con una simulación del cálculo de caja (ancho
+     disponible real tras restar paddings/flechas/gaps) en vez de a ojo, para confirmar que el
+     pliego realmente entra más grande que antes en la mayoría de los anchos de escritorio típicos
+     (≥1280px no recorta nada; en anchos más angostos, ~1024–900px, sigue recortando pero a un
+     tamaño mayor que con el reparto anterior).
+  `.magazine-canvas` tiene `object-fit: contain`: si el contenedor queda más angosto que el ancho
+  "natural" de lo que se está mostrando (ventanas de escritorio angostas), `max-width: 100%` recorta
+  el ancho pero **no** el alto (`height: 100%` fijo) — sin `object-fit` eso se ve apachurrado/
+  distorsionado horizontalmente; con `object-fit: contain` se ve más chico pero con la proporción
+  correcta, nunca deformado. Esto sigue aplicando igual con el pliego panorámico.
 
 - **PDF real usado**: `assets/proyectos/Practicaguianavegable_ReychellPerdomo.pdf` — 4 páginas
   carta (612×792pt), un documento de práctica de InDesign sobre el álbum "Hit Me Hard and Soft" de
