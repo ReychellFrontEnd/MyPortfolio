@@ -27,3 +27,6 @@ npm-debug.log*
 
 # Dependencias (por si en el futuro se agrega tooling con Node)
 node_modules/
+
+# Claude Code
+.claude/settings.local.json

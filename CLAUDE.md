@@ -4,6 +4,35 @@ Sitio estático (HTML/CSS/JS puro, sin build ni dependencias de Node) para el po
 Reychell Perdomo, estudiante de Tecnólogo en Multimedia (ITLA). Pensado para publicarse en
 **GitHub Pages** con un dominio personalizado.
 
+## Mapa rápido (dónde está cada cosa)
+
+| Si vas a tocar… | Lee primero | Archivos |
+| --- | --- | --- |
+| Navbar, logo, menú móvil | [Navbar y logo](#navbar-y-logo) | `index.html`, `css/style.css`, `js/script.js` |
+| Agregar/editar un proyecto | [Descargas de proyectos](#descargas-de-proyectos) | `index.html` (grid `.projects-grid`) |
+| Robot Steampunk (3 renders) | [Proyecto "Robot Steampunk"](#proyecto-robot-steampunk-tríptico-de-ancho-completo) | `index.html`, `css/style.css` (breakpoint 900px) |
+| Revista ReVibe / flipbook | [Revista digital interactiva](#revista-digital-interactiva-flipbook) | `js/magazine.js`, `css/magazine.css` |
+| Formulario de contacto | [Formulario de contacto → email](#formulario-de-contacto--email) | `index.html`, `js/script.js` |
+| Colores, sombras, animaciones | [Sistema de diseño y motion](#sistema-de-diseño-y-motion-auditoría-2026-08-26) | `css/style.css` (`:root`) |
+| Accesibilidad / teclado / ARIA | [Accesibilidad](#accesibilidad-auditoría-2026-08-26) | `index.html`, `js/script.js` |
+| Velocidad de carga | [Rendimiento general del sitio](#rendimiento-general-del-sitio) | `index.html` (`loading="lazy"`), `js/magazine.js` |
+| Dominio, DNS, Pages | [Publicación en GitHub Pages](#publicación-en-github-pages-con-dominio-personalizado) | `CNAME`, `.nojekyll` |
+
+**Trampas que ya costaron un bug** (detalle en las secciones enlazadas):
+1. No mover `.reveal` hacia el final de `css/style.css` → rompe el hover de las tarjetas.
+2. No volver al endpoint de Formspree por solo-email (`formspree.io/<correo>`) → devuelve 404.
+3. El honeypot `_gotcha` debe seguir excluido del selector de validación en `js/script.js`.
+4. Rutas de assets siempre con `/` y respetando mayúsculas → GitHub Pages es case-sensitive.
+5. La extensión de `download="..."` debe coincidir con el archivo real y ser única por proyecto.
+
+**Estado actual**: 9 tarjetas de proyecto (7 normales + tríptico + revista), 6 filtros
+(`branding`, `illustration`, `web`, `animation`, `3d`, `editorial`) más "Todos". Publicado en
+`reychellperdomo.lat` vía GitHub Pages (`ReychellFrontEnd/MyPortfolio`, rama `main`).
+
+**Probar local**: `python -m http.server` en la raíz y abrir `http://localhost:8000` — **no** abrir
+`index.html` con doble clic: bajo `file://` el visor de revista descarga los 88 MB del PDF completo
+antes de mostrar algo.
+
 ## Estructura
 
 ```
@@ -68,6 +97,17 @@ Cada tarjeta de proyecto tiene un botón "Ver" (abre el modal con la imagen) y u
 - El atributo `download` requiere que el archivo se sirva desde el mismo origen (no funciona con
   imágenes de otro dominio) — todas las imágenes de proyectos son locales, así que esto ya está
   garantizado.
+- **Proyectos cuyo archivo fuente es un PDF sin imagen propia** (ej. "Artículo de periódico
+  editorial", proyecto 7): la tarjeta necesita igual una `<img>` para `.project-image` (la
+  cuadrícula no soporta un PDF como fondo). El patrón ya existente (usado también por "Poster
+  vectorizado", proyecto 3) es que el `data-src` del botón "Ver" y el `src` de la miniatura pueden
+  apuntar a un **JPG** mientras el enlace "Descargar" apunta al **PDF real** — no tienen que
+  coincidir entre sí, solo cada uno con su propio `download="..."`/tipo. Para "Artículo de
+  periódico" la miniatura (`Newspaperarticle_Desktop_ReychellPerdomo_thumb.jpg`) se generó
+  renderizando la única página del PDF (`Newspaperarticle_Desktop_ReychellPerdomo.pdf`, un spread
+  de 2 páginas de periódico maquetado como una sola página ancha, 1584×1224pt) a 150dpi con
+  `pymupdf` — si el usuario reemplaza ese PDF por otro, hay que regenerar el `_thumb.jpg` a mano
+  (no hay ningún paso de build que lo haga automáticamente).
 
 ### Proyecto "Robot Steampunk" (tríptico de ancho completo)
 
@@ -248,8 +288,11 @@ el año, sin curso/herramientas como las demás tarjetas.
   carga como Blob same-origin (`fetchAsBlobUrl`) en vez de apuntar directo a la URL del CDN — un
   `new Worker()` con script de otro origen puede fallar según navegador/contexto (ej. abriendo el
   sitio con `file://` en vez de un servidor); (2) un aviso de "casi listo" a los 6s si sigue
-  cargando; (3) un salvavidas de 45s que muestra un mensaje accionable sin abortar la carga real
-  (si termina después, el visor igual aparece). **Recomendación para probarlo**: abrir el sitio con
+  cargando (`slowNoticeTimer`); (3) un salvavidas que muestra un mensaje accionable sin abortar la
+  carga real (si termina después, el visor igual aparece) — el plazo se **adelantó de 45s a 20s**
+  (`hardTimeout` en `loadDocument()`, commit `dac6d90`) porque 45s se sentía como sitio roto. Al
+  dispararse, también pone `docReady = true` y `onProgress = null` para que un evento de progreso
+  tardío no pise ese mensaje con un porcentaje viejo. **Recomendación para probarlo**: abrir el sitio con
   un servidor local (`python -m http.server`), no con doble clic al archivo — `file://` no soporta
   range-requests y obliga a descargar el PDF completo antes de mostrar nada.
 - **Segundo bug encontrado y corregido (pantalla de carga trabada en 99%, ya en producción)**: aun
