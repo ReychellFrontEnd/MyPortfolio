@@ -29,8 +29,10 @@ Reychell Perdomo, estudiante de Tecnólogo en Multimedia (ITLA). Pensado para pu
 
 **Estado actual**: 10 tarjetas de proyecto (6 normales en la cuadrícula + 4 fuera de ella: tríptico,
 artículo de periódico, revista y guía navegable — estas dos últimas en paralelo dentro de
-`.projects-duo`), 6 filtros (`branding`, `illustration`, `web`, `animation`, `3d`, `editorial`) más
-"Todos". Publicado en `reychellperdomo.lat` vía GitHub Pages (`ReychellFrontEnd/MyPortfolio`, rama
+`.projects-duo`), 4 filtros (`illustration`, `vector-arts`, `3d`, `editorial`) más "Todos" —
+`branding`, `web` y `animation` se quitaron (2026-09-28) porque ya no clasificaban a ningún
+proyecto real; ver [Descargas de proyectos](#descargas-de-proyectos) para qué proyecto lleva cada
+categoría. Publicado en `reychellperdomo.lat` vía GitHub Pages (`ReychellFrontEnd/MyPortfolio`, rama
 `main`).
 
 **Probar local**: `python -m http.server` en la raíz y abrir `http://localhost:8000` — **no** abrir
@@ -85,6 +87,19 @@ Si se agregan o quitan secciones, actualizar en paralelo:
    genérico (`a[href^="#"]`, `section[id]`).
 
 ## Descargas de proyectos
+
+**Categorías actuales** (`data-filter`/`data-category`, 2026-09-28 — reclasificación a pedido
+explícito del usuario):
+
+| Categoría | Proyectos |
+| --- | --- |
+| `illustration` (Ilustración) | "8 Deaths of Spider-Man" (portada de cómic), Poster "Dark" |
+| `vector-arts` (Vector Arts) | Los dos posters vectorizados (evolución tecnológica, Café Santo Domingo) |
+| `editorial` | Pliego de revista de videojuegos, Infografía creativa, Artículo de periódico, Revista ReVibe, Guía navegable |
+| `3d` | Robot Steampunk (tríptico) |
+
+No reasignar un proyecto a `branding`, `web` o `animation` sin antes volver a agregar el botón de
+filtro correspondiente — se quitaron los tres (2026-09-28) porque ningún proyecto real los usaba.
 
 Cada tarjeta de proyecto tiene un botón "Ver" (abre el modal con la imagen) y un botón
 "Descargar" (`<a download>`). Reglas para no romper esto al añadir proyectos nuevos:
@@ -153,8 +168,8 @@ del carrusel (ni en CSS ni en JS).
 - Responsive: `.triptych-row` es `flex-direction: row` (los 3 lado a lado) en escritorio/tablet, y
   pasa a `column` (apilados, cada uno a `height: 300px`) en `≤900px` — ver ese breakpoint en
   `css/style.css`.
-- Filtro nuevo: `data-filter="3d"` / `data-category="3d"` (antes solo existían branding,
-  illustration, web, animation).
+- Filtro `data-filter="3d"` / `data-category="3d"` (ver categorías vigentes en
+  [Descargas de proyectos](#descargas-de-proyectos)).
 - `@media (hover: none)` hace que el overlay (Ver/Descargar) quede siempre visible en pantallas
   táctiles, ya que ahí no existe `:hover` — aplica a **todas** las project-card (incluyendo los
   paneles del tríptico), corrigiendo que en móvil antes no se podía acceder a esos botones.
