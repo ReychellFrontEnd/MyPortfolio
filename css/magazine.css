@@ -2,9 +2,9 @@
    PDF.js. Mismo ancho/alto de tarjeta que .project-triptych (Robot
    Steampunk): 70% del contenedor, máx. 780px, centrado — salvo cuando van
    en paralelo dentro de .projects-duo (ver más abajo), donde cada uno cede
-   ese ancho fijo para repartirse el espacio en partes iguales. La franja
-   inferior (.project-details) es deliberadamente delgada en ambos: solo
-   nombre + año. */
+   ese ancho fijo para repartirse el espacio 60/40 (revista/guía) con
+   flexbox. La franja inferior (.project-details) es deliberadamente
+   delgada en ambos: solo nombre + año. */
 
 .project-magazine {
     margin: 1.5rem auto 0;
@@ -34,7 +34,11 @@
 /* Revista + guía navegable lado a lado en escritorio (una franja de ancho
    completo, como el tríptico, pero repartida entre dos tarjetas en vez de
    una). Cada tarjeta cede su ancho fijo del 70%/780px para repartirse el
-   espacio de .projects-duo en partes iguales con flexbox. */
+   espacio de .projects-duo con flexbox — no en partes iguales: la revista
+   muestra un spread de DOS páginas (el doble de ancho "natural" que una
+   página suelta de la guía) así que recibe más proporción (3:2, ~60/40)
+   para que el spread no se vea apiñado; la guía sigue siendo perfectamente
+   legible más angosta porque solo muestra una página a la vez. */
 .projects-duo {
     display: flex;
     align-items: stretch;
@@ -44,13 +48,20 @@
 }
 
 .projects-duo > .project-card {
-    flex: 1 1 0;
     min-width: 0;
     width: auto;
     max-width: none;
     margin: 0;
     display: flex;
     flex-direction: column;
+}
+
+.projects-duo .project-magazine {
+    flex: 3 1 0;
+}
+
+.projects-duo .project-guide {
+    flex: 2 1 0;
 }
 
 .projects-duo .magazine-viewer,
@@ -160,7 +171,7 @@
 
 .magazine-page-slot {
     position: relative;
-    height: 400px;
+    height: 360px;
     max-width: 100%;
     border-radius: 6px;
     overflow: hidden;
@@ -201,6 +212,12 @@
     height: 100%;
     width: auto;
     max-width: 100%;
+    /* Si el contenedor queda más angosto que el ancho "natural" del spread
+       a esta altura (ej. la revista comparte fila con la guía navegable en
+       .projects-duo), object-fit evita que max-width lo achique solo en
+       horizontal y lo deje viéndose apachurrado/distorsionado — en vez de
+       eso, mantiene la proporción real de la página. */
+    object-fit: contain;
 }
 
 /* En modo de una sola página (móvil angosto) se oculta la mitad derecha

@@ -361,9 +361,24 @@ como las demás tarjetas.
 
 Proyecto 10 dentro de Proyectos: `.project-card.project-guide`, colocado **en paralelo** con la
 revista (proyecto 9) a pedido explícito del usuario — ambas tarjetas viven dentro de un mismo
-contenedor `.projects-duo` (flex, 50/50, `gap: 1.5rem`) en vez de cada una ocupando su propia franja
-de ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.projects-duo` pasa a
+contenedor `.projects-duo` (flex, `gap: 1.5rem`) en vez de cada una ocupando su propia franja de
+ancho completo. En `≤900px` (mismo breakpoint que el resto del sitio) `.projects-duo` pasa a
 `flex-direction: column` y cada tarjeta ocupa el 100% del ancho, una debajo de la otra.
+
+- **Reparto 60/40, no 50/50** (a pedido explícito del usuario — "que la tarjeta de la revista sea
+  más ancha... sin perder el estilo... que siga en paralelo"): `.projects-duo .project-magazine`
+  usa `flex: 3 1 0` y `.projects-duo .project-guide` usa `flex: 2 1 0`. La razón del reparto
+  desigual (no solo "porque lo pidió así"): la revista muestra un **spread de dos páginas** (el
+  doble de ancho "natural" que una sola página) mientras que la guía solo muestra una página a la
+  vez — con 50/50 el spread quedaba más apretado que la guía para el mismo espacio recibido.
+  También se bajó la altura base de `.magazine-page-slot` de 400px a 360px (**solo la regla base,
+  no las de los media queries ≤900px/≤480px**, que ya tenían su propio valor menor y siguen
+  ganando ahí por especificidad) para que el ancho "natural" del spread quepa mejor en la columna
+  más angosta que le toca ahora. Y se agregó `object-fit: contain` a `.magazine-canvas`: si aun así
+  el contenedor quedara más angosto que ese ancho natural (ventanas de escritorio angostas, entre
+  ~900 y ~1100px), `max-width: 100%` recorta el ancho pero **no** el alto (`height: 100%` fijo) —
+  sin `object-fit`, eso se ve como el spread apachurrado/distorsionado horizontalmente; con
+  `object-fit: contain` en cambio se ve más chico pero con la proporción correcta, nunca deformado.
 
 - **PDF real usado**: `assets/proyectos/Practicaguianavegable_ReychellPerdomo.pdf` — 4 páginas
   carta (612×792pt), un documento de práctica de InDesign sobre el álbum "Hit Me Hard and Soft" de
