@@ -142,8 +142,7 @@ button:active,
 .btn:active,
 .action-btn:active,
 .filter-btn:active,
-.nav-link:active,
-.social-links a:active {
+.nav-link:active {
     transform: scale(0.97);
 }
 
@@ -1038,36 +1037,6 @@ h3 {
     border-color: var(--orchid-smoke);
 }
 
-.social-links {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-.social-links a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    background: rgba(205, 137, 158, 0.1);
-    color: var(--orchid-smoke);
-    border-radius: 50%;
-    font-size: 1.2rem;
-    transition: transform var(--duration-fast) var(--ease-standard),
-                background var(--duration-base) var(--ease-standard),
-                color var(--duration-base) var(--ease-standard),
-                border-color var(--duration-base) var(--ease-standard);
-    border: 1px solid rgba(205, 137, 158, 0.2);
-}
-
-.social-links a:hover {
-    background: var(--gradient-cta);
-    color: var(--spooled-white);
-    transform: translateY(-3px);
-    border-color: transparent;
-}
-
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -1373,10 +1342,6 @@ h3 {
     .contact-item {
         flex-direction: column;
         gap: 0.5rem;
-    }
-
-    .social-links {
-        justify-content: center;
     }
 
     .form-group input, .form-group textarea {

@@ -252,9 +252,11 @@ nunca propiedades que disparen layout) para que sea barata en el compositor.
 - Los inputs del formulario de contacto tienen `<label class="sr-only">` enlazadas por `id`/`for`
   (antes solo tenían `placeholder`, que no es un nombre accesible confiable). Los errores de
   validación usan la clase `.input-error` (antes se ponía `style.borderColor` inline por JS).
-- Todos los íconos puramente decorativos (`<i class="fa...">`) llevan `aria-hidden="true"`; los
-  enlaces de redes sociales (aún apuntan a `#`, son placeholders) tienen `aria-label` con el nombre
-  de la red.
+- Todos los íconos puramente decorativos (`<i class="fa...">`) llevan `aria-hidden="true"`.
+- Los enlaces de redes sociales en Contacto (Behance/LinkedIn/GitHub/Instagram, `.social-links`)
+  eran placeholders que apuntaban a `#` sin destino real — se quitaron del todo (HTML y su CSS en
+  `css/style.css`) a pedido explícito del usuario (2026-09-28). No reintroducirlos sin que el
+  usuario pida agregar enlaces reales.
 - Los botones de filtro de proyectos exponen `aria-pressed`, sincronizado en cada click.
 - Foco de teclado visible y consistente en toda la interfaz vía `--focus-ring` (regla global
   `:focus-visible`), en vez de depender del contorno por defecto del navegador (que estaba
