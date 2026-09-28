@@ -320,11 +320,16 @@
 
             const page = await this.pdfDoc.getPage(pageNum);
             const unscaled = page.getViewport({ scale: 1 });
-            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-            // Un poco de margen extra sobre el dpr real para que el zoom
-            // (hasta 1.6x) no se vea pixelado de inmediato, sin pasarse:
-            // cada página de este PDF ya pesa varios MB en alta resolución.
-            const scale = (targetHeightCss * dpr * 1.15) / unscaled.height;
+            // Tope de dpr (y margen de zoom) deliberadamente conservador:
+            // el PDF real (2026-09-28: reemplazado por una exportación de
+            // mayor calidad, ~2.7MB/página en promedio) ya trae de sobra
+            // detalle fuente; pedirle a pdf.js más resolución de la que la
+            // pantalla puede mostrar solo cuesta tiempo de render/paint por
+            // página sin verse más nítido. Un poco de margen extra sobre el
+            // dpr real evita que el zoom (hasta 1.6x) se vea pixelado de
+            // inmediato, sin pasarse.
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.3);
+            const scale = (targetHeightCss * dpr * 1.1) / unscaled.height;
             const viewport = page.getViewport({ scale });
 
             const canvas = document.createElement('canvas');

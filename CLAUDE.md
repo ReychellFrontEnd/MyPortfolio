@@ -305,12 +305,30 @@ ancho que `.project-triptych` (70%, máx. 780px, centrado). La franja inferior (
 es deliberadamente delgada: solo `<h3>` con el nombre y un `<p>` con el año, sin curso/herramientas
 como las demás tarjetas.
 
-- **PDF real usado**: `assets/proyectos/ReVibe_ReychellPerdomo_20241104(1).pdf` (el usuario lo
-  confirmó explícitamente). El paréntesis en el nombre va codificado como `%28`/`%29` en el
-  `data-pdf` y en el `href` de descarga. Ese PDF tiene **64 páginas** según se verificó con
-  `pypdf` — el pedido original mencionaba "87 páginas", pero el número de páginas nunca está
-  hardcodeado en el código: `js/magazine.js` lee `pdfDoc.numPages` del archivo real, así que
-  cualquier PDF que se ponga en esa ruta funciona sin tocar el JS.
+- **PDF real usado**: `assets/proyectos/ReVibe_ReychellPerdomo_20241104.pdf` — el número de páginas
+  nunca está hardcodeado en el código: `js/magazine.js` lee `pdfDoc.numPages` del archivo real, así
+  que cualquier PDF que se ponga en esa ruta funciona sin tocar el JS.
+  - **Historial de archivos** (por si aparece otro reemplazo en el futuro): el archivo original
+    tenía "(1)" en el nombre (`ReVibe_ReychellPerdomo_20241104(1).pdf`, 19MB, 64 páginas, con un
+    artefacto visible tipo "brillo/plástico" superpuesto en varias páginas — se notaba comparando
+    la portada y la contraportada). El usuario subió una exportación de **mejor calidad**
+    (2026-09-28) con el mismo nombre pero sin el "(1)" — 88MB, **33 páginas**, sin ese artefacto.
+    Se verificó abriendo ambos archivos con `pymupdf` antes de reemplazar: portada y contraportada
+    coinciden en diseño entre ambas versiones (mismo documento, no es un PDF distinto), pero la
+    cantidad de páginas cambió de 64 a 33 — no se investigó por qué (podría ser una revisión más
+    corta a propósito, o páginas dobles contadas distinto en el nuevo export); si en algún momento
+    falta contenido que antes estaba, ese es el primer lugar donde mirar. El archivo viejo se borró
+    del repo (quedaba sin usar).
+  - **Rendimiento tras el reemplazo**: la nueva exportación pesa ~2.7MB por página en promedio
+    (antes ~300KB/página) — bastante más pesada por página aunque el archivo total creció "solo"
+    ~4.6x porque tiene menos páginas. `getPageCanvas()` en `js/magazine.js` ya usaba un tope de
+    `devicePixelRatio` (para no pedirle a pdf.js más resolución de la que la pantalla puede
+    mostrar) — se bajó ese tope de 1.5 a 1.3 y el margen de zoom de 1.15 a 1.1 (2026-09-28) para
+    compensar el costo extra de decodificar/pintar páginas más pesadas; no reduce cuánto hay que
+    *descargar* por página (eso lo fija el propio archivo), pero sí el trabajo de render/paint en
+    el hilo principal por cada página. `disableAutoFetch: true` (ya existente) sigue siendo lo que
+    evita bajar el archivo completo de una — pdf.js pide por rangos de bytes solo lo que hace
+    falta para la página que se está mostrando.
 - **Arquitectura**: `PDF.js` (cargado perezosamente desde cdnjs solo cuando existe un
   `[data-magazine]` en la página, no en el `<head>`) renderiza páginas a un `<canvas>` **bajo
   demanda**, con caché acotada (`MAX_CACHE_PAGES` en `js/magazine.js`) y precarga de las páginas
@@ -373,14 +391,17 @@ como las demás tarjetas.
   página), y cada miniatura se renderiza solo cuando entra en el viewport del panel
   (`IntersectionObserver`), a baja resolución.
 - Filtro nuevo: `data-filter="editorial"` / `data-category="editorial"`.
-- **El PDF pesa 88 MB** — es, con diferencia, el mayor factor de qué tan rápido carga. Ya se
-  ajustó lo que se puede desde el código (`disableAutoFetch: true` para no traer el archivo
-  completo de una, `devicePixelRatio` tope 1.5 y menos margen de resolución al renderizar). Lo que
-  de verdad reduciría el tiempo de carga es exportar el PDF más liviano desde InDesign (preset
-  "Smallest File Size" o bajar la resolución de las imágenes) — no se tocó el PDF en sí porque es
-  contenido del usuario y recomprimirlo a ciegas arriesga perder calidad visual.
-- **Pendiente**: el usuario mencionó una revista de 87 páginas; el archivo real que indicó tiene
-  64. Si en algún momento aparece un PDF distinto de 87 páginas, basta con reemplazar el archivo en
+- **El PDF pesa 88 MB** (de nuevo, tras el reemplazo de 2026-09-28 por la versión de mejor calidad
+  — ver "Historial de archivos" más arriba en esta sección) — es, con diferencia, el mayor factor
+  de qué tan rápido carga. Ya se ajustó lo que se puede desde el código (`disableAutoFetch: true`
+  para no traer el archivo completo de una, `devicePixelRatio` tope **1.3** — bajado de 1.5 el
+  2026-09-28 — y margen de resolución reducido al renderizar). Lo que de verdad reduciría el
+  tiempo de carga es exportar el PDF más liviano desde InDesign (preset "Smallest File Size" o
+  bajar la resolución de las imágenes) — no se tocó el PDF en sí porque es contenido del usuario y
+  recomprimirlo a ciegas arriesga perder calidad visual (más aún tratándose de la versión que el
+  usuario subió explícitamente **por su mejor calidad**).
+- El PDF actual tiene **33 páginas** (`pdfDoc.numPages`, nunca hardcodeado) — si en algún momento
+  aparece un PDF con otra cantidad de páginas, basta con reemplazar el archivo en
   `assets/proyectos/` y actualizar el `data-pdf`/`href` en `index.html` — no hace falta tocar
   `js/magazine.js`.
 
