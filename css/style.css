@@ -856,93 +856,23 @@ h3 {
     min-width: 80px;
 }
 
-/* Sección Reflexión */
-.reflection-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
+/* Sección Visión (antes "Reflexión": tenía 3 tarjetas de reflexión +
+   una tarjeta final de visión; se redujo a solo esta última, a pedido
+   explícito del usuario, 2026-09-28). */
+.vision-container {
     margin-bottom: 2rem;
 }
 
-.reflection-card {
-    background: rgba(16, 30, 66, 0.65);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(205, 137, 158, 0.1);
-    transition: transform var(--duration-base) var(--ease-standard),
-                border-color var(--duration-base) var(--ease-standard),
-                box-shadow var(--duration-base) var(--ease-standard);
-}
-
-.reflection-card:hover {
-    transform: translateY(-6px);
-    border-color: var(--orchid-smoke);
-    box-shadow: var(--shadow-card);
-}
-
-.reflection-icon {
-    font-size: 2.5rem;
-    color: var(--orchid-smoke);
-    margin-bottom: 1.5rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 60px;
-    height: 60px;
-    background: rgba(205, 137, 158, 0.1);
-    border-radius: 50%;
-}
-
-.reflection-card h3 {
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-    color: var(--spooled-white);
-}
-
-.reflection-card p {
-    color: var(--sakura);
-    line-height: 1.7;
-}
-
-.reflection-card strong {
-    color: var(--orchid-smoke);
-}
-
-.reflection-full {
-    grid-column: 1 / -1;
+.vision-statement {
     background: rgba(16, 30, 66, 0.65);
     padding: 2.5rem;
     border-radius: var(--border-radius);
     border: 1px solid rgba(205, 137, 158, 0.1);
-    margin-top: 1rem;
 }
 
-.reflection-full h3 {
-    color: var(--orchid-smoke);
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    position: relative;
-    display: inline-block;
-}
-
-.reflection-full h3::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background: var(--gradient-primary);
-    border-radius: 2px;
-}
-
-.reflection-full p {
+.vision-statement p {
     color: var(--sakura);
     line-height: 1.8;
-    margin-bottom: 1.5rem;
-}
-
-.reflection-full p:last-child {
     margin-bottom: 0;
 }
 
@@ -1335,7 +1265,7 @@ h3 {
         min-width: 130px;
     }
     
-    .identity-card, .reflection-card {
+    .identity-card, .vision-statement {
         padding: 1.5rem;
     }
 

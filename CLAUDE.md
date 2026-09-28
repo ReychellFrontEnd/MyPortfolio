@@ -60,7 +60,17 @@ del proyecto.
 ## Secciones de la página
 
 `Inicio` (`#inicio`) → `Identidad` (`#identidad`) → `Proyectos` (`#proyectos`) →
-`Reflexión` (`#reflexion`) → `Contacto` (`#contacto`).
+`Visión` (`#vision`) → `Contacto` (`#contacto`).
+
+- La sección se llamaba **"Reflexión"** (`#reflexion`) y tenía 3 tarjetas de reflexión
+  (Aprendizajes Clave, Fortalezas y Debilidades, Proyección Futura) más una tarjeta final de
+  "Visión Profesional". A pedido explícito del usuario (2026-09-28) se renombró a **"Visión"** y
+  se quitaron las 3 tarjetas de reflexión — solo queda el párrafo de visión, sin su subtítulo
+  ("Visión Profesional" ya no aparece ahí porque ahora lo dice el propio título de la sección:
+  "Visión <span>Profesional</span>"). Las clases `.reflection-card`/`.reflection-icon` (y todo su
+  CSS) se eliminaron por quedar sin uso; el contenedor y la tarjeta que sí sobreviven se
+  renombraron a `.vision-container`/`.vision-statement`. No reintroducir las 3 tarjetas de
+  reflexión sin que el usuario lo pida de nuevo.
 
 - La sección **"Evolución artística y técnica"** se eliminó por pedido explícito (2026-08-25),
   junto con todo su CSS (`.evolution-*`, `.timeline-*`, `.skill-bars`, `.comparison-*`,
@@ -177,7 +187,7 @@ del carrusel (ni en CSS ni en JS).
 ### Gotcha de CSS: `.reveal.is-visible` vs. el hover de las tarjetas
 
 `.reveal`/`.reveal.is-visible` (el scroll-reveal) y cada `.identity-card:hover` /
-`.project-card:hover` / `.reflection-card:hover` / `.contact-info:hover` tienen la **misma
+`.project-card:hover` / `.contact-info:hover` tienen la **misma
 especificidad** (dos clases). Cuando dos reglas empatan en especificidad, gana la que aparece
 **después** en la hoja de estilos. Por eso `.reveal`/`.reveal.is-visible` se define muy arriba en
 `css/style.css` (justo después de `.container`), **antes** de cualquier regla de hover de tarjetas
@@ -239,16 +249,16 @@ nunca propiedades que disparen layout) para que sea barata en el compositor.
   sin volver a verificar el contraste.
 - El estado activo/hover de `.nav-link` oscurece (no aclara) el fondo — aclarar rompería el
   contraste del texto blanco en algunos puntos del degradado.
-- Se eliminó `backdrop-filter` de las tarjetas repetidas (identity/project/reflection-card, inputs,
+- Se eliminó `backdrop-filter` de las tarjetas repetidas (identity/project-card, inputs,
   modal-details) por costo de rendimiento; se conserva solo en elementos "de chrome" (navbar, menú
   móvil, modal) donde aporta jerarquía real.
 - Se eliminó la animación infinita de fondo en `.dark-section::before` (rotaba cada 20s sin parar)
   y el efecto "barrido" de gradiente en hover de botones/filtros — eran puramente decorativos y
   costosos; el feedback ahora es `transform`/`box-shadow` con `:active` para respuesta instantánea
   al presionar.
-- **Scroll-reveal**: elementos con clase `reveal` (tarjetas de Identidad/Proyectos/Reflexión) se
-  animan una sola vez vía `IntersectionObserver` (`js/script.js`) al entrar en pantalla, sin
-  listeners de `scroll`.
+- **Scroll-reveal**: elementos con clase `reveal` (tarjetas de Identidad/Proyectos, el párrafo de
+  Visión) se animan una sola vez vía `IntersectionObserver` (`js/script.js`) al entrar en pantalla,
+  sin listeners de `scroll`.
 - **Navbar sin listener de scroll**: `#scrollSentinel` (100px de alto, invisible, justo al inicio
   de `<main>`) se observa con `IntersectionObserver`; cuando deja de intersectar, el navbar gana
   `.scrolled`. El scrollspy (enlace activo según sección visible) usa el mismo patrón por sección,
@@ -282,7 +292,7 @@ nunca propiedades que disparen layout) para que sea barata en el compositor.
 `.contact-info` y `.contact-form` ahora son tarjetas reales (fondo, borde, radio, sombra y
 `translateY` al hover) — antes eran texto/formulario sueltos directamente sobre el fondo de la
 página, lo que el usuario describió como "descuidado". Cada dato de contacto usa `.contact-icon`
-(insignia circular, mismo patrón visual que `.identity-icon`/`.reflection-icon`) en vez de un
+(insignia circular, mismo patrón visual que `.identity-icon`) en vez de un
 ícono suelto. El email es un link `mailto:` real. Los inputs del formulario usan un fondo más
 oscuro que la tarjeta que los contiene (`rgba(8,14,32,0.55)` vs. `rgba(16,30,66,0.65)` de la
 tarjeta) para leerse como campos hundidos, no confundirse con el fondo de la tarjeta.
